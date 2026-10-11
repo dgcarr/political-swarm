@@ -1,0 +1,6 @@
+# Verified to resolve together against Python 3.14 for this project's benchmark venv.
+pytest==9.1.1
+pytest-cov==7.1.0
+numpy==2.5.2
+matplotlib==3.11.1
+pyyaml==6.0.3

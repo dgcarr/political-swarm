@@ -1,0 +1,645 @@
+:root {
+  color-scheme: dark;
+  --bg: #0a0b0d;
+  --panel: #131519;
+  --panel-raised: #191c21;
+  --line: #262a30;
+  --ink: #f2efe6;
+  --muted: #9aa0ab;
+  --accent: #c9a227;
+  --critical: #e2432f;
+  --democratic: #4f9e6a;
+  --socialist: #b5504a;
+  --capitalist: #4a7bb5;
+  /* The color a doctrine's flags and text use *on top of* that doctrine's own solid fill —
+     everything here reads dark, so a light ink keeps the flag legible without a second palette. */
+  --on-accent: #0a0b0d;
+}
+
+/* The page takes the accent of whichever tradition is governing the selected run. */
+body[data-strategy='democratic'] { --accent: var(--democratic); }
+body[data-strategy='socialist'] { --accent: var(--socialist); }
+body[data-strategy='capitalist'] { --accent: var(--capitalist); }
+body[data-strategy='noop'] { --accent: var(--muted); }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Two columns so the newsreel panel can run the full page height, independent of how tall
+     .page ends up. Collapses to one column under the 900px breakpoint. */
+  display: grid;
+  grid-template-columns: 1fr minmax(16rem, 20rem);
+}
+@media (max-width: 900px) { body { grid-template-columns: 1fr; } }
+
+.page { grid-column: 1; grid-row: 1; min-width: 0; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+::selection { background: var(--accent); color: var(--on-accent); }
+
+/* ------------------------------------------------------------------- type */
+
+.caps {
+  text-transform: uppercase;
+  font-stretch: condensed;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 2px solid var(--line);
+  position: relative;
+}
+/* Broadcast graphics run a rule pair under the desk, not one line. */
+.masthead::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -5px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+.masthead h1 {
+  font-size: 1.4rem;
+  margin: 0;
+  font-stretch: condensed;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.subtitle { color: var(--muted); margin: 0.15rem 0 0; font-size: 0.85rem; }
+
+.masthead-meters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.meter { color: var(--muted); }
+
+/* Broadcast convention: a red dot means live, full stop — not the doctrine's own accent. */
+.conn {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  padding-left: 0.9rem;
+  position: relative;
+  color: var(--muted);
+}
+.conn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 0.45rem; height: 0.45rem;
+  margin-top: -0.22rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.conn[data-state='live'] { color: var(--critical); }
+.conn[data-state='live']::before { animation: pulse 2s ease-in-out infinite; }
+.conn[data-state='reconnecting'] { color: var(--accent); }
+.conn[data-state='idle'] { color: var(--muted); }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) {
+  .conn[data-state='live']::before { animation: none; }
+}
+
+/* Spend gauge: a broadcast meter, ticked like a scale rather than a plain bar. */
+.budget { display: flex; align-items: center; gap: 0.5rem; }
+.budget-bar {
+  display: inline-block;
+  width: 6.5rem; height: 0.5rem;
+  background: var(--line);
+  background-image: repeating-linear-gradient(
+    90deg, rgba(0,0,0,0.35) 0, rgba(0,0,0,0.35) 1px, transparent 1px, transparent 10%
+  );
+  border-radius: 1px;
+  overflow: hidden;
+}
+.budget-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--democratic);
+  transition: transform 0.4s ease;
+}
+.budget-fill[data-level='warn'] { background: var(--accent); }
+.budget-fill[data-level='critical'] { background: var(--critical); }
+
+button {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------- main */
+
+/*
+ * An explicit [hidden] override: `main { display: grid }` below is an author rule, and an author
+ * rule beats the browser's own `[hidden] { display: none }` regardless of specificity — cascade
+ * origin, not selector weight, decides that fight. Without this, toggling gallery.hidden and
+ * single-view.hidden renders both views stacked on top of each other. Same reasoning as the
+ * `.banner[hidden]` override above; `.gallery` gets the identical treatment further down.
+ */
+main[hidden] { display: none; }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(18rem, 24rem) 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  align-items: start;
+}
+main > * { min-width: 0; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+h2 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  font-stretch: condensed;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0 0 0.7rem;
+}
+
+/* -------------------------------------------------------------- results list */
+
+.run-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+
+/*
+ * A results call, not a card with a colored edge: the doctrine owns a solid flag band across the
+ * card's own top, the way a broadcast lower-third owns its color rather than tinting a hairline.
+ */
+.run-card {
+  width: 100%;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 0;
+  display: grid;
+  overflow: hidden;
+}
+.run-card:hover { border-color: var(--accent); }
+.run-card[aria-current='true'] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+.run-flag {
+  padding: 0.22rem 0.85rem;
+  font-size: 0.66rem;
+  font-stretch: condensed;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+  background: var(--muted);
+}
+.run-card.democratic .run-flag { background: var(--democratic); }
+.run-card.socialist .run-flag { background: var(--socialist); }
+.run-card.capitalist .run-flag { background: var(--capitalist); }
+.run-card.noop .run-flag { background: var(--muted); }
+
+.run-card .goal,
+.run-card .meta { padding: 0 0.85rem; }
+.run-card .goal { padding-top: 0.6rem; }
+.run-card .meta { padding-bottom: 0.7rem; }
+
+.goal { font-size: 0.95rem; }
+.meta { color: var(--muted); font-size: 0.8rem; font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+.status {
+  text-transform: uppercase;
+  font-stretch: condensed;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.status.running,
+.status.in_progress { color: var(--accent); border-color: var(--accent); }
+.status.completed,
+.status.approved { color: var(--democratic); border-color: var(--democratic); }
+.status.failed,
+.status.rejected { color: var(--critical); border-color: var(--critical); }
+.status.blocked_on_human,
+.status.paused_human,
+.status.paused_budget { color: var(--capitalist); border-color: var(--capitalist); }
+.status.stopped { color: var(--muted); }
+
+/* -------------------------------------------------------------- detail panels */
+
+/*
+ * Every panel in the open case is a stamped block, not a bordered box: the header carries a
+ * solid field the way a graphics package labels its own segments, never a hairline rule. Routine
+ * panels stamp in a neutral plate; an urgent one (.approvals, .statement below) stamps in the
+ * governing accent instead.
+ */
+.detail-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+.panel { background: var(--panel); border: 1px solid var(--line); padding: 0.95rem 1.1rem; }
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* Bleeds to the panel's own edges — the header stamps the panel's full width, the padding
+     above keeps everything else clear of it. --line reads as a real stamped plate against the
+     panel's own near-black fill; --panel-raised sat only a few RGB units off and read as bare
+     text. */
+  margin: -0.95rem -1.1rem 0.9rem;
+  padding: 0.45rem 1.1rem;
+  background: var(--line);
+  color: var(--muted);
+}
+
+/* Sittings has no panel padding to bleed into, so its stamped band carries its own inset instead
+   of a negative-margin bleed — same plate, same promise, different container shape. */
+.runs h2 {
+  margin: 0 0 0.7rem;
+  padding: 0.45rem 1.1rem;
+  background: var(--line);
+  color: var(--muted);
+}
+
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.tasks li { display: flex; gap: 0.6rem; align-items: baseline; }
+.tasks li.has-deps { border-left: 1px dotted var(--line); }
+
+.ledger {
+  margin: 0;
+  max-height: 26rem;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--panel);
+}
+.ledger::-webkit-scrollbar { width: 10px; height: 10px; }
+.ledger::-webkit-scrollbar-track { background: var(--panel); }
+.ledger::-webkit-scrollbar-thumb { background: var(--line); border: 2px solid var(--panel); border-radius: 6px; }
+.ledger::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.ledger table { border-collapse: collapse; min-width: 100%; font-size: 0.82rem; }
+.ledger tr:nth-child(odd) { background: rgba(255, 255, 255, 0.015); }
+.ledger td { border-bottom: 1px solid var(--line); padding: 0.3rem 0.6rem; vertical-align: top; }
+.ledger .ts { color: var(--muted); font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ledger .type { color: var(--accent); font-family: ui-monospace, Consolas, monospace; white-space: nowrap; }
+.ledger .data {
+  color: var(--muted);
+  font-family: ui-monospace, Consolas, monospace;
+  word-break: break-word;
+  min-width: 12rem;
+}
+
+.ledger-raw summary {
+  cursor: pointer;
+  color: var(--muted);
+  list-style: none;
+}
+.ledger-raw summary::-webkit-details-marker { display: none; }
+.ledger-raw summary::before { content: '▸ '; }
+.ledger-raw[open] summary::before { content: '▾ '; }
+.ledger-raw summary:hover { color: var(--accent); }
+.ledger-raw pre {
+  margin: 0.35rem 0 0;
+  padding: 0.5rem 0.6rem;
+  background: var(--bg);
+  border-left: 2px solid var(--line);
+  font-size: 0.78em;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ledger-count { font-weight: 400; letter-spacing: 0.04em; text-transform: none; font-stretch: normal; }
+
+.toggle {
+  margin-left: auto;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.headline .goal { font-size: 1.1rem; margin: 0 0 0.35rem; }
+
+/* An urgent panel stamps its header in the governing accent instead of the neutral plate every
+   other panel uses — same flag language as a results-call card, never a colored edge. */
+.approvals,
+.statement { border-color: var(--accent); }
+.approvals h2,
+.statement h2 {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.approval-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.approval-list li { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+
+.workers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.6rem;
+}
+.worker-card {
+  border: 1px solid var(--line);
+  background: var(--panel-raised);
+  padding: 0.6rem 0.7rem;
+  display: grid;
+  gap: 0.2rem;
+  transition: opacity 0.6s ease, background-color 0.6s ease;
+}
+/* Called to the floor vs. gone idle is a state change, carried the same way status pills carry
+   theirs — text and fill, never a thin colored edge. */
+.worker-card.idle { opacity: 0.42; background: var(--panel); }
+.worker-name { font-size: 0.92rem; color: var(--accent); }
+.worker-card.idle .worker-name { color: var(--ink); }
+.worker-model,
+.worker-stats {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.worker-model { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.worker-stats { display: flex; gap: 0.6rem; }
+
+/* -------------------------------------------------------------- newsreel wall */
+/*
+ * A muted archival clip behind the poster panel — the Cold War texture the user asked to blend
+ * into the results-desk world. One clip plays at a time; the client advances to the next on
+ * `ended`. Kinescope grain and a vignette sit over it so a mixed library of 1940s and 1980s
+ * transfers reads as one broadcast signal rather than a folder of downloads.
+ */
+
+.newsreel {
+  position: relative;
+  flex: none;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+.newsreel[hidden] { display: none; }
+
+.newsreel-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Kinescope films run high-contrast and slightly blown out; the source transfers are flatter. */
+  filter: grayscale(0.35) contrast(1.18) brightness(0.92);
+}
+
+.newsreel-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0.5px, transparent 0.6px),
+    radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0, 0, 0, 0.75) 100%);
+  background-size: 2.5px 2.5px, 100% 100%;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+/* A faint interlace comb, cheap in CSS, and the one signal that says "broadcast," not "photo". */
+.newsreel-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 2px);
+  mix-blend-mode: multiply;
+}
+
+.newsreel-caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 0.5rem 3.4rem 0.6rem 0.8rem;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.82), transparent);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: #d8d4c8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.newsreel-pause {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.55rem;
+  z-index: 2;
+  margin-left: 0;
+  background: rgba(10, 11, 13, 0.55);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #d8d4c8;
+}
+.newsreel-pause:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ------------------------------------------------------------ doctrine ticker */
+
+.ticker-rail {
+  display: grid;
+  grid-template-columns: 1fr minmax(14rem, 22rem);
+  gap: 1.5rem;
+  align-items: stretch;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+@media (max-width: 900px) { .ticker-rail { grid-template-columns: 1fr; } }
+
+.ticker {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: 9.2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--panel);
+}
+.ticker::-webkit-scrollbar { width: 10px; height: 10px; }
+.ticker::-webkit-scrollbar-track { background: var(--panel); }
+.ticker::-webkit-scrollbar-thumb { background: var(--line); border: 2px solid var(--panel); border-radius: 6px; }
+.ticker::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Tone reads through text color and weight, the way a real wire feed sets urgency in the copy
+   itself — never a colored edge marker. Alarm is the one tone loud enough to also earn a solid
+   full-row wash, the same "own the whole field" rule the results flags follow. */
+.ticker-line {
+  display: flex;
+  gap: 0.65rem;
+  align-items: baseline;
+  padding: 0.15rem 0.5rem;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.ticker-line.entering { opacity: 0; transform: translateY(0.5rem); }
+
+.ticker-time {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.ticker-text { font-size: 0.94rem; }
+
+.ticker-line.tone-routine { color: var(--ink); }
+.ticker-line.tone-contest { color: #e8d9a8; }
+.ticker-line.tone-ruling { color: #f2efe6; font-weight: 700; }
+.ticker-line.tone-alarm { color: #ffd9d3; background: var(--critical); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker { scroll-behavior: auto; }
+  .ticker-line, .ticker-line.entering { transition: none; opacity: 1; transform: none; }
+}
+
+.epigraph {
+  margin: 0;
+  padding: 0.6rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.epigraph blockquote {
+  margin: 0;
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.epigraph figcaption {
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ gallery */
+
+.gallery[hidden] { display: none; }
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  align-items: start;
+}
+
+.gallery-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 0;
+  display: grid;
+  gap: 0;
+  cursor: pointer;
+  min-height: 15rem;
+  align-content: start;
+  overflow: hidden;
+}
+.gallery-card:hover { border-color: var(--accent); }
+.gallery-head,
+.gallery-goal,
+.gallery-meta,
+.gallery-ticker { padding-left: 1rem; padding-right: 1rem; }
+
+.gallery-flag {
+  padding: 0.28rem 1rem;
+  font-size: 0.68rem;
+  font-stretch: condensed;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+  background: var(--muted);
+}
+.gallery-card.democratic .gallery-flag { background: var(--democratic); }
+.gallery-card.socialist .gallery-flag { background: var(--socialist); }
+.gallery-card.capitalist .gallery-flag { background: var(--capitalist); }
+
+.gallery-head { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-top: 0.75rem; }
+.gallery-goal {
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+}
+.gallery-meta { font-size: 0.74rem; margin-top: 0.3rem; color: var(--muted); font-family: ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+.gallery-card .budget-bar { margin: 0.55rem 1rem 0; width: auto; }
+
+.gallery-ticker {
+  list-style: none;
+  margin: 0.4rem 0 0.85rem;
+  padding: 0;
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.8rem;
+}
+.gallery-ticker .ticker-line { padding-left: 0.55rem; }
+.gallery-ticker .ticker-text {
+  font-size: 0.8rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+}
+
+.statement h2 {
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+}
+.statement p {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  max-width: 46rem;
+}
+.statement p:first-child { font-style: italic; }
+.statement p:last-child { margin-bottom: 0; }
+
+.empty { color: var(--muted); font-style: italic; }
+.error { color: var(--critical); }

@@ -1,0 +1,142 @@
+# OpenRouter model roster by role.
+#
+# Chat-model metadata is checked against OpenRouter's live catalog by `npm run smoke:models`.
+# Decision models are absent from that catalog and are checked by answering a Decisions API question.
+# The catalog check exists because these fields were
+# previously guessed: qwen/qwen-2.5-coder-32b-instruct was declared as supporting response_format
+# and tool calls when the catalog says it supports neither, so WorkerDispatcher sent a parameter the
+# model rejects — provider 500s, unquoted JSON keys and fenced code where an object was required,
+# on every run. Its price was understated 3.7x on input and 5.6x on output, so spend was misreported
+# too. A hand-edited roster is a roster that drifts; verify before trusting it.
+#
+# supportsJsonMode controls whether chat requests initially ask for response_format;
+# supportsToolCalls controls whether eligible requests may use tools. If a provider refuses JSON
+# mode, OpenRouterClient retries without response_format. Structured output still depends on
+# prompting, validation, and corrective retries when JSON mode is unavailable or refused.
+#
+# Chat-model schema probes exercise the implementer and planner request shapes.
+# Decision models answer typed questions through a separate API.
+#
+# Chat roles use upstage/solar-mini4 as primary and openai/gpt-6-luna as fallback, except the
+# implementer (~openai/gpt-luna-latest, falling back to solar-mini4). Their configured context windows
+# are 524288 and 1050000 tokens. The decider role has a separate
+# Decisions API roster.
+#
+# Fallbacks are a different provider from their primary on purpose. A fallback that shares its
+# primary's provider is a fallback only until that provider has an outage.
+
+# 2026-10-02: every role now runs solar-mini4 (model bench #2, A+) with gpt-oss-safeguard-20b (#8,
+# A+) behind it. inkling-small (#121, B) stalled past the 90s fast-role timeout repeatedly as
+# reviewer, opposition, generalist and integrator.
+# 2026-10-04: the fallback moved to gpt-6-luna (#3, A+); gpt-oss-safeguard-20b was rate-limited
+# upstream for most of a sweep.
+roles:
+  planner:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  implementer:
+    # Experiment (2026-09-10): every strategy's benchmark validation run converged on the same
+    # blocker — an incomplete CLI (missing alloydamage/__main__.py, unhandled subcommand parsing)
+    # that gpt-oss-120b kept failing to finish within the bounded retry/remediation budget. First
+    # tried deepseek-chat-v3-0324 (probed clean, fast); one validation run showed no clear
+    # improvement (confounded by a single noisy sample) before being superseded by this pick.
+    # glm-5.2 probed clean on both schemas with the fastest implementer latency seen (881ms) at
+    # this session's --max-input-price 3 ceiling.
+    # 2026-09-30: inkling-small returned `pass`/`...` stubs on all four democratic attempts at
+    # core-modules (~300 output tokens, ~1.8s each), so the implementer alone moved to ling-3.0-flash.
+    # 2026-10-02: moved to solar-mini4 with gpt-oss-safeguard-20b behind it, both A+ on the model
+    # bench (config/model-bench.md) and both honoring response_format.
+    # 2026-10-08: the implementer alone moved to ~openai/gpt-luna-latest (bench #9, A+). In
+    # full-2026-10-07b solar-mini4 rewrote managerial's composition task from scratch eight times
+    # without converging, even when shown the exact failing assertion. Its fallback is solar-mini4
+    # rather than gpt-6-luna: the alias currently has gpt-6-luna's catalog entry, so gpt-6-luna would
+    # likely be the same model from the same provider. The alias floats; a sweep's results belong to
+    # whatever it pointed at then.
+    primary: "~openai/gpt-luna-latest"
+    fallback: upstage/solar-mini4
+  reviewer:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  opposition:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  speaker:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  regulator:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  # Acceptance-barrier roles. The persona ids passed at each call carry the doctrine's own
+  # institution (integration-committee / integration-council / integration-assessor); the role here
+  # only picks the model. Verification must never reuse the integrator's persona — the engine
+  # rejects a delivery manifest whose verifier is the agent that performed integration.
+  integrator:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  verifier:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  # Only used when SWARM_DASHBOARD_RHETORIC=llm, to re-voice the dashboard's closing statement.
+  # Never on the critical path: if it fails, is slow, or cites a figure the run record does not
+  # contain, the deterministic statement is kept instead.
+  rhetorician:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  generalist:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  bidder:
+    primary: upstage/solar-mini4
+    fallback: openai/gpt-6-luna
+  # Bounded governance choices (ballots, votes, rulings, allocation) use OpenRouter's alpha Decisions
+  # API through WorkerDispatcher.decide when decisionModels is pure. Work verdicts always use written
+  # chat reviews. Unusable or low-confidence decision answers return to the call site's ordinary chat role.
+  decider:
+    primary: upstage/solar-decide
+    fallback: typesafe/jev-1.13
+
+models:
+  # Roster (2026-10-04): solar-mini4 is the primary for every role and gpt-6-luna the fallback for
+  # every role, both A+ on config/model-bench.md and both honoring response_format.
+  # The configured chat models use different providers. util/modelsConfig.test.ts checks distinct
+  # primary/fallback model IDs; smoke/modelsSmoke.ts checks catalog resolution and response_format
+  # coverage for chat roles. Neither enforces provider diversity.
+  # inkling-small and gemini-3.1-flash-lite, the previous roster, were removed.
+  # Primary for every chat role. Upstage; 524k context; OpenRouter lists response_format and tools.
+  upstage/solar-mini4:
+    inputPricePerMTok: 0.05
+    outputPricePerMTok: 0.20
+    supportsJsonMode: true
+    supportsToolCalls: true
+    contextLength: 524288
+  # Fallback for every chat role (bench rank 3). Replaced gpt-oss-safeguard-20b, whose upstream rate
+  # limit turned 134 fallbacks into task errors in one 2026-10-04 sweep. 1.05M context;
+  # OpenRouter lists response_format and tools.
+  openai/gpt-6-luna:
+    inputPricePerMTok: 0.10
+    outputPricePerMTok: 0.50
+    supportsJsonMode: true
+    supportsToolCalls: true
+    contextLength: 1050000
+  # Implementer primary from 2026-10-08 (bench #9). OpenRouter's floating alias for OpenAI's latest
+  # Luna model; catalog entry identical to gpt-6-luna's: 1.05M context, response_format and tools.
+  "~openai/gpt-luna-latest":
+    inputPricePerMTok: 0.10
+    outputPricePerMTok: 0.50
+    supportsJsonMode: true
+    supportsToolCalls: true
+    contextLength: 1050000
+  # Decision models: no chat endpoint, no prose, a probability per option; output tokens are free.
+  # Absent from the chat catalog, so models.smoke checks each by answering one question.
+  upstage/solar-decide:
+    api: decisions
+    inputPricePerMTok: 0.10
+    outputPricePerMTok: 0
+    supportsJsonMode: false
+    supportsToolCalls: false
+  typesafe/jev-1.13:
+    api: decisions
+    inputPricePerMTok: 0.042
+    outputPricePerMTok: 0
+    supportsJsonMode: false
+    supportsToolCalls: false

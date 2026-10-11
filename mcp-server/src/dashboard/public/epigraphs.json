@@ -1,0 +1,125 @@
+{
+  "_note": "Direct quotations, each verified against the source text at the URL given. Do not edit the `quote` fields without re-checking them against the source — a misquotation attributed to a real author is worse than no epigraph at all. Works are drawn from the reading lists in docs/philosophy/.",
+  "democratic": [
+    {
+      "quote": "Again, there is no liberty, if the power of judging be not separated from the legislative and executive powers.",
+      "work": "The Spirit of Laws, Book XI, ch. 6",
+      "author": "Montesquieu",
+      "source": "https://en.wikisource.org/wiki/The_Spirit_of_Laws_(1758)/Book_XI"
+    },
+    {
+      "quote": "Your representative owes you, not his industry only, but his judgment; and he betrays, instead of serving you, if he sacrifices it to your opinion.",
+      "work": "Speech to the Electors of Bristol",
+      "author": "Edmund Burke",
+      "source": "https://press-pubs.uchicago.edu/founders/documents/v1ch13s7.html"
+    },
+    {
+      "quote": "If men were angels, no government would be necessary.",
+      "work": "The Federalist, No. 51",
+      "author": "James Madison",
+      "source": "https://avalon.law.yale.edu/18th_century/fed51.asp"
+    },
+    {
+      "quote": "Ambition must be made to counteract ambition.",
+      "work": "The Federalist, No. 51",
+      "author": "James Madison",
+      "source": "https://avalon.law.yale.edu/18th_century/fed51.asp"
+    },
+    {
+      "quote": "Instead of looking on discussion as a stumbling-block in the way of action, we think it an indispensable preliminary to any wise action at all.",
+      "work": "History of the Peloponnesian War, the Funeral Oration",
+      "author": "Thucydides",
+      "source": "http://classics.mit.edu/Thucydides/pelopwar.2.second.html"
+    },
+    {
+      "quote": "The efficient secret of the English Constitution may be described as the close union, the nearly complete fusion, of the executive and legislative powers.",
+      "work": "The English Constitution",
+      "author": "Walter Bagehot",
+      "source": "https://en.wikisource.org/wiki/The_English_Constitution_(Bagehot,_1894)/The_Cabinet"
+    }
+  ],
+  "socialist": [
+    {
+      "quote": "The Commune was formed of the municipal councillors, chosen by universal suffrage in the various wards of the town, responsible and revocable at short terms.",
+      "work": "The Civil War in France",
+      "author": "Karl Marx",
+      "source": "https://www.marxists.org/archive/marx/works/1871/civil-war-france/ch05.htm"
+    },
+    {
+      "quote": "From each according to his ability, to each according to his needs!",
+      "work": "Critique of the Gotha Programme",
+      "author": "Karl Marx",
+      "source": "https://www.marxists.org/archive/marx/works/1875/gotha/ch01.htm"
+    },
+    {
+      "quote": "They must manage the means of production. They must be masters of the factories, masters of their own labor, to conduct it at their own will.",
+      "work": "Workers' Councils",
+      "author": "Anton Pannekoek",
+      "source": "https://www.marxists.org/archive/pannekoe/1947/workers-councils.htm"
+    },
+    {
+      "quote": "They are not officials in the service of the workers' councils, obediently having to perform their orders. They are groups of workers, like other groups collectively regulating their work themselves.",
+      "work": "Workers' Councils",
+      "author": "Anton Pannekoek",
+      "source": "https://www.marxists.org/archive/pannekoe/1947/workers-councils.htm"
+    },
+    {
+      "quote": "The animal species, in which individual struggle has been reduced to its narrowest limits, and the practice of mutual aid has attained the greatest development, are invariably the most numerous, the most prosperous, and the most open to further progress.",
+      "work": "Mutual Aid: A Factor of Evolution",
+      "author": "Peter Kropotkin",
+      "source": "https://www.marxists.org/reference/archive/kropotkin-peter/1902/mutual-aid/conclusion.htm"
+    },
+    {
+      "quote": "The decisive thing is the organisation of the strictest and country-wide accounting and control of production and distribution of goods.",
+      "work": "The Immediate Tasks of the Soviet Government",
+      "author": "V. I. Lenin",
+      "source": "https://www.marxists.org/archive/lenin/works/1918/mar/x03.htm"
+    }
+  ],
+  "capitalist": [
+    {
+      "quote": "The knowledge of the circumstances of which we must make use never exists in concentrated or integrated form but solely as the dispersed bits of incomplete and frequently contradictory knowledge which all the separate individuals possess.",
+      "work": "The Use of Knowledge in Society",
+      "author": "F. A. Hayek",
+      "source": "https://www.econlib.org/library/Essays/hykKnw.html"
+    },
+    {
+      "quote": "In a system in which the knowledge of the relevant facts is dispersed among many people, prices can act to coördinate the separate actions of different people.",
+      "work": "The Use of Knowledge in Society",
+      "author": "F. A. Hayek",
+      "source": "https://www.econlib.org/library/Essays/hykKnw.html"
+    },
+    {
+      "quote": "It is not from the benevolence of the butcher, the brewer, or the baker that we expect our dinner, but from their regard to their own interest.",
+      "work": "An Inquiry into the Nature and Causes of the Wealth of Nations",
+      "author": "Adam Smith",
+      "source": "https://www.gutenberg.org/files/3300/3300-h/3300-h.htm"
+    },
+    {
+      "quote": "The main reason why it is profitable to establish a firm would seem to be that there is a cost of using the price mechanism.",
+      "work": "The Nature of the Firm",
+      "author": "R. H. Coase",
+      "source": "http://econdse.org/wp-content/uploads/2014/09/firm-coase.pdf"
+    },
+    {
+      "quote": "The same process of industrial mutation — if I may use that biological term — that incessantly revolutionizes the economic structure from within, incessantly destroying the old one, incessantly creating a new one.",
+      "work": "Capitalism, Socialism and Democracy",
+      "author": "Joseph A. Schumpeter",
+      "source": "https://en.wikiquote.org/wiki/Capitalism,_Socialism_and_Democracy"
+    },
+    {
+      "quote": "Unless the number of individuals in a group is quite small, or unless there is coercion or some other special device to make individuals act in their common interest, rational, self-interested individuals will not act to achieve their common or group interests.",
+      "work": "The Logic of Collective Action",
+      "author": "Mancur Olson",
+      "source": "https://en.wikipedia.org/wiki/The_Logic_of_Collective_Action"
+    }
+  ],
+  "noop": [
+    {
+      "quote": "No governance model is in force. The engine is running bare.",
+      "work": "",
+      "author": "",
+      "source": ""
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "strategy": "single_agent",
+  "kind": "control",
+  "articles": [],
+  "rights": [],
+  "decisionRules": {},
+  "config": {
+    "riskClassification": {
+      "securityPathGlobs": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*secret*",
+        "**/*credential*"
+      ],
+      "crossModuleThreshold": 2
+    }
+  },
+  "digest": "4c556bde4da8834a280b6a916a0e045a57b809d2b34c8cb5167404bd3bcd5dc7"
+}

@@ -1,0 +1,43 @@
+name: PR CI
+
+on:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp-server
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mcp-server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      # Both run a real engine with NoopStrategy: no API key, no network, no recorded runs needed.
+      # smoke:dashboard replays gitignored recordings and stays a local development tool.
+      - name: Smoke test engine
+        run: node dist/smoke/engineSmoke.js
+
+      - name: Smoke test live dashboard
+        run: node dist/smoke/dashboardLiveSmoke.js
+
+      # The README's zero-cost end-to-end example: engine run, constitution, forged-tally refusal, audit.
+      - name: End-to-end example
+        run: node dist/examples/governanceTour.js

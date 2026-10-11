@@ -1,0 +1,17 @@
+node_modules/
+mcp-server/dist/
+runs/
+.env
+.env.*
+!.env.example
+*.log
+dist/
+coverage/
+.claude/settings.local.json
+config/models.local.json
+benchmark/results/
+benchmark/.venv/
+__pycache__/
+*.pyc
+graphify-out/
+graphify-out-runs/

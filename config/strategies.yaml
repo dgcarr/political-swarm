@@ -1,0 +1,276 @@
+# Per-strategy tunables for the democratic, socialist, and capitalist doctrines and the managerial
+# and single_agent controls. All five share the engine in mcp-server/src/engine/; each SwarmStrategy
+# implementation reads its own section. mcp-server/src/constitution/schema.ts validates this file at
+# startup (an unknown key or an unrecognised threshold label stops the server) and holds every
+# key's default, which matches the value written here.
+
+democratic:
+  voteThresholds:
+    routine: simple_majority
+    cross_module: three_fifths
+    # The Commons division needs two-thirds support; a separate appointed Security Committee
+    # casts a binding two-thirds vote before human and independent safety review.
+    security_boundary: two_thirds_plus_security_committee
+    # Constitutional changes need two thirds of all Commons and House of Review seats before
+    # the independent human and safety gates; abstentions cannot manufacture that threshold.
+    constitutional_amendment: two_thirds_both_chambers
+    test_waiver: human_required
+  riskClassification:
+    securityPathGlobs: ["**/auth/**", "**/security/**", "**/*secret*", "**/*credential*"]
+    crossModuleThreshold: 2 # touching >= N top-level modules counts as cross-module
+  committee:
+    electedSpecialistCalls: 2
+    sortitionCalls: 1
+    # The Chair's ruling sizes the committee. Routine business — 52 of 101 motions in the recorded
+    # runs — and a recommittal returning to the committee that already ruled are heard by a single
+    # specialist; anything ruled 'committee' or 'emergency' still faces the full chamber above,
+    # the sortition seat, the division and the Opposition's challenge. A parliament that sends routine
+    # business to full committee is not more democratic, it is declining to use its own expedited
+    # procedure — and this doctrine was spending 90.7% of its model calls deliberating and 9.3%
+    # building, twice failing an entire run on the maxWorkerCalls ceiling.
+    expeditedElectedSpecialistCalls: 1
+    expeditedSortitionCalls: 0
+  confidenceVote:
+    consecutiveFailuresBeforeSwap: 3
+  questionTimeEveryNTasks: 5
+  # The constituencies the Code Commons represents (section 6). One representative each; a motion's
+  # portfolioTag routes it to the constituency that answers for it.
+  constituencies: [frontend, backend, data, security, testing, documentation, user-experience, operations]
+  cabinet:
+    portfolios: [architecture, implementation, verification, security, integration, documentation, release-operations]
+    # Section 6: once an executive plan is approved, the cabinet defends it collectively or a
+    # dissenting minister records a formal dissent and resigns the portfolio.
+    collectiveResponsibility: true
+  # Section 6's Shadow Cabinet mirrors the executive portfolios. Keys are portfolio tags; `default`
+  # catches portfolios without a dedicated shadow.
+  shadowCabinet:
+    architecture: shadow-architecture-reviewer
+    security: shadow-security-reviewer
+    verification: shadow-verification-lead
+    testing: shadow-verification-lead
+    release-operations: shadow-release-reviewer
+    default: shadow-general-reviewer
+  offices:
+    termLengthInTasks: 6 # section 8 rotation cadence; 0 disables rotation
+    candidatesPerOffice: 3
+    constituentBallots: true # equal constituency ballots elect officers; engaged representatives also cast expressed Commons ballots
+    votersPerConstituency: 2 # virtual constituency members elect each Commons representative
+    # 'run-id' seeds sortition and performance-appointment tie draws. Ballot elections instead
+    # record each constituency or virtual constituent position in the governance ledger.
+    seed: run-id
+  speaker:
+    admissibilityRuling: true # one dispatch per drafted motion (section 7, first reading)
+    duplicateTitleSimilarity: 0.85 # deterministic duplicate screen, runs before any dispatch
+    maxMotionsPerReading: 12 # section 14's time-box against endless deliberation
+  debate:
+    # Section 7 stage 4: agents must answer objections rather than repeat conclusions. One reply,
+    # and only when the Opposition actually objects.
+    governmentReplyOnObjection: true
+    maxRoundsPerMotion: 1 # a round is one objection and its reply; 0 means no reply, and 1 is the most the House holds
+  houseOfReview:
+    enabled: true
+    minRiskClass: medium # 'low' convenes it always; 'high' only for security-boundary programmes
+    maxDelays: 1 # section 6: delaying and revising, not vetoing
+  confidence:
+    governmentFailuresBeforeMotion: 3
+    representativeRecallFailures: 3
+  ceremonialHead:
+    emergencyRollbackAfterRemediationCycles: 2
+  accountability:
+    postImplementationReport: true
+
+socialist:
+  # Specialist guilds federate by discipline (section 6). Worker councils, which own production, are
+  # formed per work unit from the guild members whose discipline that unit touches.
+  guilds: [frontend, backend, testing, security, docs, architecture]
+  initialCapabilityScore: 0.5
+  councils:
+    membersPerGuild: 2
+    requirePlanRatification: true # a council can approve, amend, or reject its versioned plan mandate
+    memberBallots: true # one equal plan and final-delivery ballot per eligible council worker
+    # 'run-id' seeds delegate, convener and appeal-panel draws from the run id, so a run's
+    # coordination register can be re-derived from its ledger. 'fixed' makes every run draw
+    # identically (useful in tests).
+    seed: run-id
+  coordinating:
+    termLengthInTasks: 6 # article 5: coordination authority is temporary
+    # Article 6. Anything outside this list belongs to the affected council: section 8 is explicit
+    # that "the coordinating council owns ordering, not technical truth".
+    mandate: [ordering, interface, scarce-resource]
+    requireProductiveDuty: true # section 6: coordinators also perform inspectable work
+  reconnaissance:
+    # Section 7 stage 2: affected councils inspect in parallel and publish to the commons, and the
+    # coordinating council synthesises rather than privately invents the plan. The cap is section
+    # 14's time-box against endless assembly.
+    maxCouncils: 2
+    requireProposedTests: true # a council report that proposes no acceptance test is refused and asked for again
+  allocation:
+    # Article 4: resources follow demonstrated need, difficulty and risk — never the worker's rank.
+    resourceEnvelopes: true # task reservations draw from the shared run budget by assessed need
+    needsWeighting:
+      riskClass: 2
+      breadth: 1
+      dependencies: 1
+      priorRejections: 2
+    lessonBudget:
+      min: 3
+      max: 8
+    returnsBeforeReplan: 2 # section 6: returning an assignment is planning information
+  mutualAid:
+    enabled: true
+    rejectionsBeforeAid: 1 # aid arrives before escalation, not after
+  recovery:
+    failuresBeforeDiagnosis: 2 # section 11: repeated failure commissions an independent diagnosis
+    maxAttemptsPerNode: 3 # section 14's retry limit against endless rescue
+    appealOnScopeChange: true
+  # Delegate misallocation recall transfers its work mandate. Diagnosed specification failures
+  # recall the planner and trigger bounded revision of unfinished work in this run. Council-initiated
+  # loss-of-confidence and concealed-evidence recall are not yet exposed as separate motions.
+  recall:
+    consecutivePlannerFailuresBeforeSwap: 3
+    delegateMisallocations: 3
+  # Only security-sensitive work escalates to the human (section 11). Repeated rejection stays with
+  # the councils (diagnosis, mutual aid, reassignment) up to the engine's maxTaskAttempts.
+  escalateToHuman:
+    securityPathGlobs: ["**/auth/**", "**/security/**", "**/*secret*", "**/*credential*"]
+
+capitalist:
+  bidCount: 3
+  # Two sealed bids on a low-risk listing is still a competitive tender; a third is ceremony.
+  # Bidding was 41% of this doctrine's model calls — 175 bids to make 72 awards.
+  lowRiskBidCount: 2
+  escrowFraction: 0.2
+  escrowReleaseAfterCleanTasks: 3
+  capitalFloorForHighRisk: 0
+  # Raised from 100 (2026-09-10): a single real contract's priced resource consumption
+  # (config/strategies.yaml's usdToTokens: 1000 converts real OpenRouter spend directly into this
+  # unit) measured 94-330 tokens across two live validation runs, median ~108-145 — meaning a
+  # firm started with less capital than half of one typical contract cost, so ordinary variance in
+  # a single task (not a run of failures) was enough for outright bankruptcy via
+  # liabilities-exceed-capital, never reaching the "3 consecutive failures" insolvency path
+  # article 11 actually describes. 500 (~4x the observed mean) gives a firm room for several real
+  # contracts, so sustained failure — not one costly task — is what triggers insolvency.
+  initialCapital: 500
+  riskClassification:
+    securityPathGlobs: ["**/auth/**", "**/security/**", "**/*secret*", "**/*credential*"]
+    highRiskRequiresSpendApproval: true
+  bankruptcyThreshold: 0
+  # Section 6's price list — what the market charges for the scarce things it names. Every line has a
+  # default in strategies/capitalist/prices.ts; anything left out here keeps it. The rates are sized
+  # so settlement stays dominated by the contract price rather than by overheads: a list that swamped
+  # the award would make every contract a loss and the exchange pointless. Article 5 cares that
+  # consumption is visible and comparable between bidders, not about the absolute calibration.
+  # Section 6's listing terms. Budget, deadline and warranty all scale from these baselines by risk
+  # class and by how much of the tree the statement of work covers, so a bidder can see in advance
+  # what the contract is worth and what it is held to. A bid above the published budget is refused
+  # outright rather than scored down: a budget that can be outbid was never a term.
+  listingTerms:
+    baseBudget: 100
+    baseDeadlineMinutes: 20
+    baseWarrantyTasks: 1 # retention matures by contract; later attributed defects claim that contract's funds
+  # The published capability roster, for section 8's comparative advantage. Entry has to run on a
+  # rule a bidder can read in advance (article 4), so anyone left out here falls back to the
+  # published rotation in strategies/capitalist/exchange.ts rather than to a per-run draw.
+  specialisations:
+    bidder-1: [backend, implementation]
+    bidder-2: [testing, implementation]
+    bidder-3: [frontend, implementation]
+  # Section 6's courts. A dispute is a contested reading of the same evidence — the clearest case is a
+  # check that failed with output suggesting the command never ran at all, where the buyer sees an
+  # unproven delivery and the supplier sees a broken environment. That used to be settled by a
+  # regular expression on behalf of the party it favours. The cap is section 14's time-box: a market
+  # that litigates everything has moved its transaction costs rather than reduced them.
+  arbitration:
+    maxPerRun: 2
+  # Section 6's public goods authority, venture pool and internal monetary policy. Olson's problem,
+  # in the doctrine's own terms: "Some valuable work cannot be funded reliably through private
+  # contracts" — shared test infrastructure, documentation standards, security baselines, technical
+  # debt reduction — and the answer it proposes is "a levy on profitable contracts". Without one,
+  # articles 8 and 9 are unenforceable, because there is nothing for a contract to have failed to
+  # pay into. The levy falls on profit rather than revenue: a loss-making contract has already cost
+  # its firm capital, and taxing it too would make failure compound rather than merely cost.
+  treasuryPolicy:
+    levyFraction: 0.1
+    publicGoodsShare: 0.7 # the rest funds the venture pool, which pays for what is untried
+    # Section 6: "It should not rescue every failing firm. Permanent bailouts destroy market
+    # discipline." One rescue per run, never twice for the same firm, never the whole shortfall, and
+    # never more than the fund holds. Set to 0 to bar rescues entirely.
+    maxBailoutsPerRun: 1
+    bailoutFraction: 0.5
+    maxGrantFraction: 0.5 # shared-work tender grants cannot consume more than this fund share or pledged credit backing
+  # Section 6's credit and banking. Credit lets a firm's record rather than its balance decide what
+  # it can take on; without it the exchange is an auction among whoever is richest, which on a run
+  # where capital only accumulates means whoever won first. The ceiling answers section 6's own
+  # warning — "unchecked leverage is dangerous because agents can consume shared compute while
+  # shifting losses to the repository" — by capping what the market as a whole owes against what
+  # actually backs it (the insurance reserve plus the treasury), not merely what any one firm owes.
+  # Credit is drawn for insurance-premium shortfalls and repaid from verified profitable settlement.
+  creditPolicy:
+    baseLimitFraction: 0.5
+    minSettlementsForCredit: 1 # a firm with no record has no future earnings to borrow against
+    maxSystemLeverage: 1
+  # Section 6's insurance: "Insurance converts hidden risk into an explicit price." The premium comes
+  # out of the winning firm's own capital, which is what makes it a price rather than a levy on the
+  # commons, and section 14's answer to moral hazard is capital genuinely at risk. Every one of the
+  # six factors section 6 names raises the premium; none discounts below the base rate, because the
+  # mitigations are worth having for being cheaper than the premium, not for earning a rebate.
+  insurancePolicy:
+    basePremiumFraction: 0.02
+    deductibleFraction: 0.25 # the firm always bears part of its own claim
+    requiredAtRisk: [high]
+    # Capped so cover cannot swallow the contract: an uninsurable premium is a refusal to let the
+    # work at all, and that decision belongs to the buyer and the regulator.
+    maxPremiumFraction: 0.4
+  # Section 6's capital accounts and reputation, and section 11's insolvency. Reputation is
+  # domain-specific and decays: a firm with an excellent security record is not thereby a good
+  # documentation supplier, and a record earned twenty settlements ago is evidence about a firm that
+  # no longer exists in the same form. An undecaying score is how an incumbent coasts.
+  capitalPolicy:
+    neutralReputation: 0.5
+    reputationDecayPerSettlement: 0.1
+    # Section 11's second ground. A firm can be solvent on paper and still be the wrong place for the
+    # next contract — the point is to stop resources staying trapped in it, not to punish it.
+    consecutiveFailuresForInsolvency: 3
+  # Enabled shapes: fixed price, time and materials, and high-risk warranty. Outcome payment needs
+  # a frozen evaluator-owned baseline; tournaments need independent supplier worktrees and loser
+  # cost accounting. Both are disabled until those mechanics exist.
+  contractPolicy:
+    baseRetention: 0.2
+    warrantyRetention: 0.4 # high-risk work stays exposed longer, so more is held back
+    timeAndMaterialsCapMultiple: 2
+    outcomeContractsEnabled: false
+    tournamentSuppliers: 2
+    # Off by default: section 8 is candid that the risk is duplicated expenditure, and a swarm on a
+    # metered budget pays for every losing implementation.
+    tournamentsEnabled: false
+  # Section 6's agent firms, and the Coase margin between forming one and going to market.
+  firms:
+    maxSubcontractors: 1 # section 14's time-box: every specialist engaged is another model call
+    # Coupling at or above which one firm takes both listings instead of a second auction. High by
+    # design: the doctrine wants the market to be the default coordinator, and integration to be the
+    # exception Coase argues for — "integrated control where coordination and interface costs are
+    # high" — rather than a way of avoiding auctions.
+    integrationThreshold: 0.6
+  priceList:
+    usdToTokens: 1000 # model spend arrives in USD; bids quote in the abstract token unit
+    perReviewerCall: 3 # reviewer attention is the scarcest input in the swarm, so it costs the most
+    perMergeRiskFile: 0.5 # multiplied by (1 + dependants): breaking a depended-on file costs more
+    securityExposure: # flat, by risk class
+      low: 0
+      medium: 2
+      high: 8
+
+# The two benchmark controls. Each reads only riskClassification (and managerial, maxReviewAttempts).
+# Without these sections managerial's built-in security globs were empty, so it never labelled a
+# task high-risk, and single_agent's differed from the doctrines'. Values match the doctrines' and
+# each strategy's existing defaults. Neither strategy acts on risk class beyond recording it.
+managerial:
+  riskClassification:
+    securityPathGlobs: ["**/auth/**", "**/security/**", "**/*secret*", "**/*credential*"]
+    crossModuleThreshold: 2
+  maxReviewAttempts: 3
+
+single_agent:
+  riskClassification:
+    securityPathGlobs: ["**/auth/**", "**/security/**", "**/*secret*", "**/*credential*"]
+    crossModuleThreshold: 2

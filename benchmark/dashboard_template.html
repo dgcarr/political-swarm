@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Doctrine Bench</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --surface-2: #f2f1ec;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --good: #0ca30c;
+    --good-text: #006300;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #d03b3b;
+    --s-democratic: #2a78d6;
+    --s-socialist: #eb6834;
+    --s-capitalist: #1baf7a;
+    --s-managerial: #eda100;
+    --s-single_agent: #e87ba4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --surface-2: #232320;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255,255,255,0.10);
+      --good: #0ca30c;
+      --good-text: #0ca30c;
+      --warning: #fab219;
+      --serious: #ec835a;
+      --critical: #e66767;
+      --s-democratic: #3987e5;
+      --s-socialist: #d95926;
+      --s-capitalist: #199e70;
+      --s-managerial: #c98500;
+      --s-single_agent: #d55181;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #232320;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255,255,255,0.10);
+    --good: #0ca30c;
+    --good-text: #0ca30c;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #e66767;
+    --s-democratic: #3987e5;
+    --s-socialist: #d95926;
+    --s-capitalist: #199e70;
+    --s-managerial: #c98500;
+    --s-single_agent: #d55181;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, "SF Mono", monospace; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  .shell { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+  header.top h1 {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+  header.top p.tagline {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+  header.top .meta {
+    text-align: right;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  header.top .meta .path { color: var(--ink-2); }
+
+  /* KPI strip */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .kpi .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .kpi .value {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  .kpi .sub { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .filters .group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filters .group-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+    margin-right: 4px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 4px 10px 4px 8px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: var(--ink-2);
+    user-select: none;
+    transition: opacity 0.1s;
+  }
+  .chip .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .chip.off { opacity: 0.38; }
+  .chip:hover { border-color: var(--ink-2); }
+  select {
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 10px;
+  }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    margin-bottom: 36px;
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 1080px; }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--surface);
+    text-align: left;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  thead th:hover { color: var(--ink-2); }
+  thead th .arrow { opacity: 0.5; margin-left: 3px; font-size: 9px; }
+  thead th.active { color: var(--ink); }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--grid);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-2); }
+
+  .doctrine-cell { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  .doctrine-cell .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+
+  .run-cell { color: var(--ink-2); }
+  .run-cell .label { color: var(--ink); }
+  .run-cell .ts { display: block; font-size: 11px; color: var(--muted); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; font-weight: 500;
+    padding: 3px 8px; border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .badge .icon { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .badge.status-completed { color: var(--good-text); background: color-mix(in srgb, var(--good) 14%, transparent); }
+  .badge.status-completed .icon { background: var(--good); }
+  .badge.status-terminated_incomplete { color: var(--ink-2); background: color-mix(in srgb, var(--warning) 20%, transparent); }
+  .badge.status-terminated_incomplete .icon { background: var(--warning); }
+  .badge.status-paused_budget { color: var(--ink-2); background: color-mix(in srgb, var(--serious) 20%, transparent); }
+  .badge.status-paused_budget .icon { background: var(--serious); }
+  .badge.status-harness_error { color: var(--critical); background: color-mix(in srgb, var(--critical) 16%, transparent); }
+  .badge.status-harness_error .icon { background: var(--critical); }
+  .badge.status-fallback { color: var(--ink-2); background: var(--surface-2); }
+  .badge.status-fallback .icon { background: var(--muted); }
+
+  .frac { font-family: "IBM Plex Mono", monospace; }
+  .frac.good { color: var(--good-text); }
+  .frac.bad { color: var(--critical); }
+  .frac.na { color: var(--muted); }
+
+  .bar-cell { display: flex; align-items: center; gap: 8px; }
+  .bar-track { width: 46px; height: 5px; border-radius: 3px; background: var(--grid); overflow: hidden; flex: none; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+
+  .num { text-align: right; }
+  .dash { color: var(--muted); }
+
+  /* Charts */
+  .charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .chart-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px 14px;
+  }
+  .chart-panel h3 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+  .chart-panel .chart-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 16px; }
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    height: 150px;
+    border-bottom: 1px solid var(--baseline);
+    padding-bottom: 0;
+    position: relative;
+  }
+  .bars .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+  }
+  .bars .bar {
+    width: 100%;
+    max-width: 46px;
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    transition: filter 0.1s;
+  }
+  .bars .col:hover .bar { filter: brightness(1.12); }
+  .bars .bar .value {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .bars .col .xlabel {
+    margin-top: 8px;
+    font-size: 10.5px;
+    color: var(--ink-2);
+    text-align: center;
+    line-height: 1.25;
+  }
+  .bars .col .n {
+    font-size: 9.5px;
+    color: var(--muted);
+  }
+  .bars .empty-note {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--ink);
+    color: var(--page);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    padding: 6px 9px;
+    border-radius: 4px;
+    z-index: 20;
+    display: none;
+    white-space: nowrap;
+    line-height: 1.5;
+  }
+
+  footer.legend {
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+    color: var(--ink-2);
+    font-size: 12px;
+  }
+  footer.legend .row { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 10px; }
+  footer.legend .item { display: flex; align-items: center; gap: 6px; }
+  footer.legend .item .icon { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  footer.legend p { max-width: 90ch; margin: 4px 0; }
+  footer.legend .note { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div>
+      <h1>Doctrine Bench</h1>
+      <p class="tagline">Coding-swarm benchmark results, compared across governance doctrines: democratic, socialist, capitalist, managerial, and single-agent.</p>
+    </div>
+    <div class="meta">
+      <div>Generated from <span class="path mono" id="source-path"></span></div>
+      <div id="row-count"></div>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="filters">
+    <div class="group" id="strategy-filters">
+      <span class="group-label">Doctrine</span>
+    </div>
+    <div class="group">
+      <span class="group-label">Run</span>
+      <select id="run-filter"></select>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="results-table">
+      <thead><tr id="table-head"></tr></thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <section class="charts">
+    <div class="chart-panel">
+      <h3>Cost per run</h3>
+      <div class="chart-sub">Median spend, USD — resource efficiency</div>
+      <div class="bars" id="chart-cost"></div>
+    </div>
+    <div class="chart-panel">
+      <h3>Test pass rate</h3>
+      <div class="chart-sub">Share of in-run verification checks that passed — engineering quality</div>
+      <div class="bars" id="chart-tests"></div>
+    </div>
+    <div class="chart-panel">
+      <h3>Oracle checks passed</h3>
+      <div class="chart-sub">Median of the independent 11-check suite — the outcome measure</div>
+      <div class="bars" id="chart-oracle"></div>
+    </div>
+  </section>
+
+  <footer class="legend">
+    <div class="row" id="status-legend"></div>
+    <p>Each row is one strategy's result from one benchmark run (<code class="mono">benchmark/results/&lt;run&gt;/&lt;strategy&gt;/metrics.json</code>). <strong>Tests</strong> counts in-run verification passes against attempts; <strong>Oracle</strong> is the independent, swarm-blind check suite where measured. A strategy can appear more than once if it was re-run.</p>
+    <p class="note" id="data-note"></p>
+  </footer>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = __BENCHMARK_DATA__;
+
+const STRATEGY_LABEL = {
+  democratic: 'Democratic',
+  socialist: 'Socialist',
+  capitalist: 'Capitalist',
+  managerial: 'Managerial',
+  single_agent: 'Single-agent',
+};
+const STRATEGY_COLOR_VAR = {
+  democratic: '--s-democratic',
+  socialist: '--s-socialist',
+  capitalist: '--s-capitalist',
+  managerial: '--s-managerial',
+  single_agent: '--s-single_agent',
+};
+const STATUS_LABEL = {
+  completed: 'Completed',
+  terminated_incomplete: 'Incomplete',
+  paused_budget: 'Paused (budget)',
+  harness_error: 'Harness error',
+};
+
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmtUsd = (n) => n == null ? null : '$' + n.toFixed(n < 0.01 ? 4 : 3);
+const fmtPct = (n) => n == null ? null : Math.round(n) + '%';
+const fmtTokens = (n) => {
+  if (n == null) return null;
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(n);
+};
+const fmtDuration = (ms) => {
+  if (ms == null) return null;
+  const s = Math.round(ms / 1000);
+  if (s < 60) return s + 's';
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  if (m < 60) return m + 'm ' + rem + 's';
+  const h = Math.floor(m / 60);
+  return h + 'h ' + (m % 60) + 'm';
+};
+const relDate = (ts) => {
+  // ts like 2026-08-22T14-03-25-801Z -> ISO
+  const iso = ts.replace(/^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z$/, '$1T$2:$3:$4.$5Z');
+  const d = new Date(iso);
+  if (isNaN(d)) return ts;
+  return d.toISOString().slice(0, 10);
+};
+
+let sortKey = 'runTimestamp';
+let sortDir = -1;
+let activeStrategies = new Set(DATA.strategyOrder);
+let activeRun = 'all';
+
+function visibleRows() {
+  return DATA.rows.filter(r =>
+    activeStrategies.has(r.strategy) &&
+    (activeRun === 'all' || r.runFolder === activeRun)
+  );
+}
+
+function median(nums) {
+  const s = nums.filter(n => n != null).slice().sort((a, b) => a - b);
+  if (!s.length) return null;
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+// Read the suite size off the data rather than hardcoding 11, so adding an oracle check does not
+// silently leave the chart labelled with the old denominator.
+// --trial-index rotates which doctrine runs first against the shared allowance, so it is the only
+// thing separating two runs of the same label. Without it repeated trials are indistinguishable.
+function trialSuffix(row) {
+  return row.trialIndex == null ? '' : ` · trial ${row.trialIndex}`;
+}
+
+function oracleTotal() {
+  const row = DATA.rows.find(r => r.oracle);
+  return row ? row.oracle.total : '?';
+}
+
+function renderKpis() {
+  const rows = visibleRows();
+  const runFolders = new Set(rows.map(r => r.runFolder));
+  const completed = rows.filter(r => r.status === 'completed').length;
+  const costs = rows.map(r => r.costUsd).filter(n => n != null);
+  const medCost = median(costs);
+  const kpis = [
+    { label: 'Benchmark runs', value: runFolders.size, sub: rows.length + ' strategy-results' },
+    { label: 'Doctrines covered', value: new Set(rows.map(r => r.strategy)).size + ' / ' + DATA.strategyOrder.length, sub: DATA.strategyOrder.filter(s => !new Set(rows.map(r=>r.strategy)).has(s)).map(s => STRATEGY_LABEL[s]).join(', ') || 'all present' },
+    { label: 'Completion rate', value: rows.length ? Math.round(100 * completed / rows.length) + '%' : '—', sub: completed + ' of ' + rows.length + ' completed' },
+    { label: 'Median cost', value: medCost != null ? fmtUsd(medCost) : '—', sub: 'per run, USD' },
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="label">${k.label}</div>
+      <div class="value tnum">${k.value}</div>
+      <div class="sub">${k.sub}</div>
+    </div>`).join('');
+}
+
+function renderFilters() {
+  const el = document.getElementById('strategy-filters');
+  el.innerHTML = '<span class="group-label">Doctrine</span>' + DATA.strategyOrder.map(s => `
+    <span class="chip ${activeStrategies.has(s) ? '' : 'off'}" data-strategy="${s}">
+      <span class="dot" style="background:var(${STRATEGY_COLOR_VAR[s]})"></span>${STRATEGY_LABEL[s]}
+    </span>`).join('');
+  el.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const s = chip.dataset.strategy;
+      if (activeStrategies.has(s)) activeStrategies.delete(s); else activeStrategies.add(s);
+      renderAll();
+    });
+  });
+
+  const runSel = document.getElementById('run-filter');
+  const runs = [...new Set(DATA.rows.map(r => r.runFolder))];
+  runs.sort();
+  runSel.innerHTML = '<option value="all">All runs</option>' + runs.map(r => {
+    const row = DATA.rows.find(x => x.runFolder === r);
+    return `<option value="${r}">${row.runLabel}${trialSuffix(row)} (${relDate(row.runTimestamp)})</option>`;
+  }).join('');
+  runSel.value = activeRun;
+  runSel.onchange = () => { activeRun = runSel.value; renderAll(); };
+}
+
+const COLUMNS = [
+  { key: 'strategy', label: 'Doctrine' },
+  { key: 'runTimestamp', label: 'Run' },
+  { key: 'status', label: 'Status' },
+  { key: 'testsFrac', label: 'Tests', numeric: true },
+  { key: 'coveragePercent', label: 'Coverage', numeric: true },
+  { key: 'oracleFrac', label: 'Oracle', numeric: true },
+  { key: 'costUsd', label: 'Cost', numeric: true },
+  { key: 'wallClockMs', label: 'Duration', numeric: true },
+  { key: 'workerCalls', label: 'Calls', numeric: true },
+  { key: 'tokensTotal', label: 'Tokens', numeric: true },
+  { key: 'filesChanged', label: 'Files', numeric: true },
+  { key: 'taskErrors', label: 'Errors', numeric: true },
+  { key: 'autoApprovalsCount', label: 'Approvals', numeric: true },
+];
+
+function sortValue(row, key) {
+  switch (key) {
+    case 'strategy': return DATA.strategyOrder.indexOf(row.strategy);
+    case 'testsFrac': return row.tests.ran ? row.tests.passed / row.tests.ran : -1;
+    case 'oracleFrac': return row.oracle ? row.oracle.passed / row.oracle.total : -1;
+    case 'tokensTotal': return row.tokensPrompt + row.tokensCompletion;
+    default: return row[key] == null ? -Infinity : row[key];
+  }
+}
+
+function renderTableHead() {
+  const tr = document.getElementById('table-head');
+  tr.innerHTML = COLUMNS.map(c => `
+    <th data-key="${c.key}" class="${c.numeric ? 'num' : ''} ${sortKey === c.key ? 'active' : ''}">
+      ${c.label}${sortKey === c.key ? `<span class="arrow">${sortDir === 1 ? '▲' : '▼'}</span>` : ''}
+    </th>`).join('');
+  tr.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+      renderTable();
+    });
+  });
+}
+
+function statusBadge(status) {
+  const cls = STATUS_LABEL[status] ? status : 'fallback';
+  const label = STATUS_LABEL[status] || status || 'unknown';
+  return `<span class="badge status-${cls}"><span class="icon"></span>${label}</span>`;
+}
+
+function testsCell(row) {
+  const t = row.tests;
+  if (!t.ran) return '<span class="dash">—</span>';
+  const cls = t.lastPassed ? 'good' : 'bad';
+  return `<span class="frac ${cls} tnum" title="${t.passed} of ${t.ran} verification runs passed; last run ${t.lastPassed ? 'passed' : 'failed'}">${t.passed}/${t.ran}</span>`;
+}
+
+function oracleCell(row) {
+  if (!row.oracle) return '<span class="dash">not measured</span>';
+  const frac = row.oracle.passed / row.oracle.total;
+  const cls = frac === 1 ? 'good' : (frac === 0 ? 'bad' : '');
+  return `<span class="frac ${cls} tnum">${row.oracle.passed}/${row.oracle.total}</span>`;
+}
+
+function coverageCell(row) {
+  if (row.coveragePercent == null) return '<span class="dash">—</span>';
+  const pct = row.coveragePercent;
+  const color = pct >= 70 ? css('--good') : pct >= 40 ? css('--warning') : css('--critical');
+  return `<div class="bar-cell">
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <span class="tnum">${fmtPct(pct)}</span>
+  </div>`;
+}
+
+function costCell(row) {
+  if (row.costUsd == null) return '<span class="dash">—</span>';
+  const pct = row.budgetUsd ? Math.min(100, 100 * row.costUsd / row.budgetUsd) : 0;
+  return `<div class="bar-cell">
+    <span class="tnum" style="min-width:52px">${fmtUsd(row.costUsd)}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${css('--ink-2')}"></div></div>
+  </div>`;
+}
+
+function compareValues(a, b) {
+  if (typeof a === 'string' || typeof b === 'string') return String(a).localeCompare(String(b));
+  return a - b;
+}
+
+function renderTable() {
+  const rows = visibleRows().slice().sort((a, b) => compareValues(sortValue(a, sortKey), sortValue(b, sortKey)) * sortDir);
+  renderTableHead();
+  document.getElementById('table-body').innerHTML = rows.map(row => `
+    <tr>
+      <td><div class="doctrine-cell"><span class="dot" style="background:var(${STRATEGY_COLOR_VAR[row.strategy]})"></span>${STRATEGY_LABEL[row.strategy]}</div></td>
+      <td class="run-cell"><span class="label">${row.runLabel}${trialSuffix(row)}</span><span class="ts mono">${relDate(row.runTimestamp)}</span></td>
+      <td>${statusBadge(row.status)}</td>
+      <td class="num">${testsCell(row)}</td>
+      <td class="num">${coverageCell(row)}</td>
+      <td class="num">${oracleCell(row)}</td>
+      <td class="num">${costCell(row)}</td>
+      <td class="num tnum">${row.wallClockMs != null ? fmtDuration(row.wallClockMs) : '<span class="dash">—</span>'}</td>
+      <td class="num tnum">${row.workerCalls ?? '<span class="dash">—</span>'}</td>
+      <td class="num tnum" title="${row.tokensPrompt} prompt + ${row.tokensCompletion} completion">${fmtTokens(row.tokensPrompt + row.tokensCompletion)}</td>
+      <td class="num tnum">${row.filesChanged ?? '<span class="dash">—</span>'}</td>
+      <td class="num tnum" style="${row.taskErrors ? `color:${css('--critical')}` : ''}">${row.taskErrors ?? 0}</td>
+      <td class="num tnum" style="${row.autoApprovalsCount ? `color:${css('--warning')}` : ''}">${row.autoApprovalsCount ?? 0}</td>
+    </tr>`).join('') || `<tr><td colspan="${COLUMNS.length}" style="text-align:center;color:var(--muted);padding:24px;">No results match the current filters.</td></tr>`;
+}
+
+function showTooltip(evt, html) {
+  const tip = document.getElementById('tooltip');
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  tip.style.left = (evt.clientX + 14) + 'px';
+  tip.style.top = (evt.clientY + 14) + 'px';
+}
+function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
+
+// perRowFn is optional: when supplied and a doctrine has more than one run, the tooltip reports
+// the min-max range as well as the aggregate. Repeated trials exist to expose run-to-run spread,
+// so a bar that hides it would be actively misleading.
+function renderBarChart(elId, aggFn, formatFn, perRowFn) {
+  const el = document.getElementById(elId);
+  const rows = visibleRows();
+  const byStrategy = DATA.strategyOrder
+    .filter(s => activeStrategies.has(s))
+    .map(s => ({ strategy: s, rows: rows.filter(r => r.strategy === s) }))
+    .filter(d => d.rows.length);
+
+  if (!byStrategy.length) {
+    el.innerHTML = '<div class="empty-note">No data for the current filters</div>';
+    return;
+  }
+
+  const values = byStrategy.map(d => {
+    const seen = perRowFn ? d.rows.map(perRowFn).filter(v => v != null) : [];
+    return {
+      strategy: d.strategy,
+      value: aggFn(d.rows),
+      n: d.rows.length,
+      spread: seen.length > 1 ? [Math.min(...seen), Math.max(...seen)] : null,
+    };
+  });
+  const max = Math.max(...values.map(v => v.value ?? 0), 0.000001);
+
+  el.innerHTML = values.map(v => {
+    const h = v.value == null ? 0 : Math.max(2, Math.round(100 * v.value / max));
+    const spread = v.spread ? `${formatFn(v.spread[0])} – ${formatFn(v.spread[1])}` : '';
+    return `<div class="col" data-strategy="${v.strategy}" data-value="${v.value}" data-n="${v.n}" data-spread="${spread}">
+      <div class="bar" style="height:${h}%;background:var(${STRATEGY_COLOR_VAR[v.strategy]})">
+        <span class="value tnum">${v.value == null ? '—' : formatFn(v.value)}</span>
+      </div>
+      <div class="xlabel">${STRATEGY_LABEL[v.strategy]}<br><span class="n">n=${v.n}</span></div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.col').forEach(col => {
+    col.addEventListener('mousemove', (evt) => {
+      const s = col.dataset.strategy;
+      const v = col.dataset.value === 'null' ? null : parseFloat(col.dataset.value);
+      const range = col.dataset.spread ? `<br>range ${col.dataset.spread}` : '';
+      showTooltip(evt, `<strong>${STRATEGY_LABEL[s]}</strong><br>${v == null ? 'no data' : formatFn(v)} across ${col.dataset.n} run(s)${range}`);
+    });
+    col.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+function testPassRate(rows) {
+  const withTests = rows.filter(r => r.tests.ran > 0);
+  if (!withTests.length) return null;
+  const total = withTests.reduce((a, r) => a + r.tests.ran, 0);
+  const passed = withTests.reduce((a, r) => a + r.tests.passed, 0);
+  return 100 * passed / total;
+}
+
+function renderCharts() {
+  renderBarChart('chart-cost', rows => median(rows.map(r => r.costUsd)), v => fmtUsd(v), r => r.costUsd);
+  renderBarChart('chart-tests', testPassRate, v => Math.round(v) + '%');
+  renderBarChart(
+    'chart-oracle',
+    rows => median(rows.map(r => (r.oracle ? r.oracle.passed : null))),
+    v => (Number.isInteger(v) ? v : v.toFixed(1)) + ' / ' + oracleTotal(),
+    r => (r.oracle ? r.oracle.passed : null),
+  );
+}
+
+function renderLegend() {
+  const el = document.getElementById('status-legend');
+  el.innerHTML = Object.entries(STATUS_LABEL).map(([k, v]) => `
+    <span class="item"><span class="icon" style="background:var(${
+      k === 'completed' ? '--good' : k === 'harness_error' ? '--critical' : k === 'paused_budget' ? '--serious' : '--warning'
+    })"></span>${v}</span>`).join('');
+
+  const rows = DATA.rows;
+  const noOracle = rows.every(r => !r.oracle);
+  const noCoverage = rows.every(r => r.coveragePercent == null);
+  const notes = [];
+  if (noOracle) notes.push('no run in this dataset has independent oracle results yet');
+  if (noCoverage) notes.push('no run in this dataset has a coverage measurement yet (pytest-cov was not installed/configured for these runs)');
+  document.getElementById('data-note').textContent = notes.length ? 'Note: ' + notes.join('; ') + '.' : '';
+}
+
+function renderAll() {
+  renderKpis();
+  renderFilters();
+  renderTable();
+  renderCharts();
+}
+
+document.getElementById('source-path').textContent = DATA.generatedFrom;
+document.getElementById('row-count').textContent = DATA.rows.length + ' rows';
+renderLegend();
+renderAll();
+</script>
+</body>
+</html>

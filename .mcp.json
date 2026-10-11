@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "swarm": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.js"],
+      "env": {
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}",
+        "SWARM_PLUGIN_ROOT": "${CLAUDE_PLUGIN_ROOT}",
+        "SWARM_CONFIG_DIR": "${CLAUDE_PLUGIN_ROOT}/config",
+        "SWARM_RUNS_DIR": "${CLAUDE_PLUGIN_ROOT}/runs",
+        "SWARM_DEFAULT_REPO_PATH": "${CLAUDE_PROJECT_DIR}"
+      }
+    }
+  }
+}

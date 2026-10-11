@@ -1,0 +1,26 @@
+{
+  "name": "political-swarm",
+  "version": "0.1.1",
+  "description": "Multi-agent coding swarm for Claude Code using democratic, socialist, or capitalist governance to coordinate OpenRouter models.",
+  "author": {
+    "name": "Dave Carr"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "multi-agent",
+    "agent-swarm",
+    "ai-agents",
+    "coding-agents",
+    "openrouter",
+    "mcp",
+    "model-context-protocol",
+    "llm",
+    "code-generation",
+    "agent-orchestration",
+    "multi-agent-systems",
+    "typescript"
+  ],
+  "commands": "./commands",
+  "mcpServers": "./.mcp.json"
+}

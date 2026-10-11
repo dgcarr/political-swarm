@@ -1,0 +1,59 @@
+# BudgetGuard checks recorded spend before model calls and pauses for a budget_increase approval
+# when the run budget is exhausted. Approved budget increases are capped at hardCeilingUsd.
+# These are admission limits, not a guaranteed maximum bill: in-flight calls can take actual spend
+# past a limit before the next check.
+
+defaults:
+  perRunUsd: 2.00
+  perTaskUsd: 0.30 # base for need-weighted socialist task reservations; in-flight model calls may overrun an envelope
+  # Raised with maxTaskAttempts. Doubling the attempt budget from 3 to 6 doubled the worst case
+  # here without this being revisited, and democratic -- which re-runs its per-task ceremony on
+  # every attempt -- started dying on the ceiling rather than on its work: 300 calls spent settling
+  # two tasks of seven, with four never started. This bounds resource use, not doctrine judgment,
+  # and the doctrines that finish inside 60 calls are unaffected by where it sits.
+  maxWorkerCalls: 800
+  maxWallClockMinutes: 30
+  # Ceiling on doctrine-requested rework for one task — bounds resource use, never doctrine
+  # judgment. See engine/SwarmEngine.ts's settleTask 'rework' handling.
+  #
+  # Raised from 3 once rejections started carrying the actual defect into the next attempt
+  # (engine/rejectionDirective.ts). Three was generous for blind retries and tight for informed
+  # ones: a real task spent its three attempts writing the module, then writing its tests, then
+  # discovering that the supplied Fe data repeats its final energy point — three distinct
+  # fingerprints, none flagged `repeated`, converging when the budget ran out. Livelock is caught
+  # by the attempt fingerprint, not by this number, so this only has to be large enough for a task
+  # that is genuinely making progress.
+  #
+  # Raised from 6 after a real alloy-damage benchmark run: the "damage" motion's interpolation
+  # implementation used all 6 attempts narrowing genuine bugs (out-of-range handling, the
+  # pure-element case) with Opposition's objection visibly softening each attempt (reject/high ->
+  # flag/medium) right up to the ceiling — a task converging, not looping, cut off by resource
+  # bound rather than doctrine judgment.
+  maxTaskAttempts: 8
+  # Institutional procedure remains doctrine-owned, but cannot consume an unbounded number of
+  # distinct decisions on one engineering task. Repository-read rounds and retries inside one
+  # dispatch still count against maxWorkerCalls, but do not multiply this decision ceiling.
+  maxInstitutionalCallsPerTask: 24
+  # Calls stream and fail over to the role's fallback model once the model goes silent: no first
+  # token within firstTokenMs, or a gap longer than betweenTokensMs mid-answer. Silence is what marks
+  # a stalled call; a wall-clock limit cannot tell a stall from slow, productive work. 60s to the
+  # first token clears an ordinary queue wait and a reasoning model streaming its thinking; 30s of
+  # silence mid-answer is a dead stream. Same figures as the benchmark (BENCHMARK_STALL_TIMEOUT in
+  # mcp-server/src/benchmark/runBenchmark.ts). Remove this block to go back to unstreamed calls
+  # bounded by the per-call ceilings alone.
+  stallTimeout:
+    firstTokenMs: 60000
+    betweenTokensMs: 30000
+  # Hard ceiling on one call, which with stallTimeout set only bounds a model that keeps producing
+  # tokens. It was 60s while it also had to detect stalls; at 60s it would cut off a streaming
+  # implementer mid-file, so it now matches the benchmark's fast-role ceiling.
+  perCallTimeoutMs: 300000
+  # Per-role overrides of perCallTimeoutMs, keyed by role name in config/models.yaml. The implementer
+  # writes whole files and the planner returns a whole task graph, so both are generation-bound and
+  # get the benchmark's longer leash (a measured planner answer took 340s).
+  perCallTimeoutMsByRole:
+    implementer: 600000
+    planner: 600000
+  warnAtFractionOfPerRun: 0.8
+
+hardCeilingUsd: 10.00

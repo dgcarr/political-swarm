@@ -1,0 +1,76 @@
+# Verification categories and evidence policy. Categories run against the run's worktree: once as
+# a baseline before planning, after each task's execute(), and again on the integrated tree at the
+# integration barrier. Exit code
+# (not agent self-report) determines whether a category passed. Every command/args pair comes from
+# this file and never from model output — see RepoWorktree.runAllowListedCommand.
+#
+# The command is trusted; what it runs is not. A test runner executes the tests the swarm wrote, so
+# every category runs model-written code with your user's privileges. It gets a scrubbed
+# environment (PATH, HOME, locale, temp dirs, VIRTUAL_ENV, CI=1 — no API keys or tokens;
+# see mcp-server/src/util/childEnv.ts), so a check that needs another variable will not see it.
+#
+# sandbox: bubblewrap (Linux, needs `bwrap`) additionally runs every check with no network, the
+# whole filesystem read-only except the worktree, and a private /tmp. Tool caches are redirected
+# to /tmp, so a check that needs to download packages at test time will fail under it — install
+# dependencies in the target repo first. If bwrap is unavailable the check is recorded as not run
+# (never run unconfined), and a required check that did not run blocks acceptance.
+# Default: none. See .github/SECURITY.md for the threat model.
+#
+# Section 9 of each doctrine in docs/philosophy/ requires the swarm to run every check applicable to
+# the repository and change, and to record a reason for any category it omits. A category whose
+# command isn't present in the target repo is recorded as skipped-with-reason and disclosed in the
+# delivery packet as a limitation — it is never silently counted as a pass.
+#
+# required: true  -> a failure blocks doctrine acceptance
+# required: false -> a failure is disclosed as a limitation and an unresolved finding
+#
+# manualEvidenceAccepted defaults to true: where no available automated check demonstrates a
+# criterion, the mandate may name a reproducible manual inspection. Set it to false for headless
+# acceptance; every criterion must then name a check category. The benchmark overrides it to false.
+
+sandbox: none
+
+categories:
+  - id: unit
+    command: npm
+    args: ["test", "--silent"]
+    timeoutMs: 60000
+    required: true
+  - id: typecheck
+    command: npx
+    args: ["tsc", "--noEmit"]
+    timeoutMs: 60000
+    required: false
+  - id: lint
+    command: npm
+    args: ["run", "--silent", "lint"]
+    timeoutMs: 60000
+    required: false
+
+# Commands a critic (reviewer, opposition, regulator, verifier) may run before its verdict, via the
+# run_review_command tool. The engine fixes command + args; the critic may only append arguments,
+# and absolute or ".." paths are refused. Each runs in a throwaway copy of the worktree under the
+# same environment scrubbing and sandbox as checks. Left undeclared, every category above is offered
+# with arguments the critic appends (one test file, a name filter); `reviewCommands: []` offers none.
+# See docs/Configuration.md.
+# reviewCommands:
+#   - id: python
+#     description: "python -c <code>: call the package directly"
+#     command: python
+#     args: ["-c"]
+#     maxArgChars: 4000
+
+# Paths the engine treats as tests for the non-waivable integrity floor. No doctrine may delete a
+# test, or weaken one's assertions, to obtain a passing result — every philosophy doc forbids it in
+# the same terms, so the guard lives in the engine and opens a test_waiver for a human instead.
+testPathGlobs:
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/__tests__/**"
+
+# Ceiling on concurrent strategy.execute() calls for tasks with disjoint declared ownership.
+# Everything downstream of execute (apply, checks, review, decide) stays serial: those are the
+# acceptance barriers, and they share one worktree.
+maxConcurrentExecutes: 3

@@ -1,0 +1,67 @@
+{
+  "name": "political-swarm-mcp-server",
+  "version": "0.1.0",
+  "description": "Multi-agent coding swarm for Claude Code using democratic, socialist, or capitalist governance to coordinate OpenRouter models.",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "smoke:engine": "npm run build && node dist/smoke/engineSmoke.js",
+    "smoke:models": "npm run build && node dist/smoke/modelsSmoke.js",
+    "probe:models": "npm run build && node dist/smoke/modelProbe.js",
+    "bench:models": "npm run build && node dist/smoke/modelBench.js",
+    "bench:decisions": "npm run build && node dist/smoke/decisionBench.js",
+    "smoke:mcp": "npm run build && node dist/smoke/mcpSmoke.js",
+    "smoke:capitalist": "npm run build && node dist/smoke/capitalistSmoke.js",
+    "smoke:democratic": "npm run build && node dist/smoke/democraticSmoke.js",
+    "smoke:socialist": "npm run build && node dist/smoke/socialistSmoke.js",
+    "smoke:delivery": "npm run build && node dist/smoke/deliverySmoke.js",
+    "smoke:budget": "npm run build && node dist/smoke/budgetSmoke.js",
+    "smoke:dashboard-live": "npm run build && node dist/smoke/dashboardLiveSmoke.js",
+    "smoke:dashboard": "npm run build && node dist/smoke/dashboardSmoke.js",
+    "smoke:all": "npm run smoke:models && npm run smoke:engine && npm run smoke:mcp && npm run smoke:capitalist && npm run smoke:democratic && npm run smoke:socialist && npm run smoke:delivery && npm run smoke:budget && npm run smoke:dashboard-live && npm run smoke:dashboard",
+    "benchmark": "npm run build && node dist/benchmark/runBenchmark.js",
+    "example": "npm run build && node dist/examples/governanceTour.js",
+    "verify:run": "node dist/cli/verifyRun.js",
+    "constitution:export": "npm run build && node dist/constitution/export.js --out-dir ../docs/constitutions",
+    "propaganda:fetch": "node scripts/fetch-propaganda.mjs",
+    "propaganda:clean": "node scripts/fetch-propaganda.mjs --clean"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.14.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "author": "Dave Carr",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "multi-agent",
+    "agent-swarm",
+    "ai-agents",
+    "coding-agents",
+    "openrouter",
+    "mcp",
+    "model-context-protocol",
+    "llm",
+    "code-generation",
+    "agent-orchestration",
+    "multi-agent-systems",
+    "typescript"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "political-swarm-marketplace",
+  "description": "Marketplace for the Political Swarm multi-agent governance experiment and Claude Code plugin.",
+  "owner": {
+    "name": "dgcarr"
+  },
+  "plugins": [
+    {
+      "name": "political-swarm",
+      "description": "Multi-agent coding swarm for Claude Code using democratic, socialist, or capitalist governance to coordinate OpenRouter models.",
+      "author": {
+        "name": "Dave Carr"
+      },
+      "source": "./"
+    }
+  ]
+}

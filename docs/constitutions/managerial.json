@@ -1,0 +1,20 @@
+{
+  "strategy": "managerial",
+  "kind": "control",
+  "articles": [],
+  "rights": [],
+  "decisionRules": {},
+  "config": {
+    "riskClassification": {
+      "securityPathGlobs": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*secret*",
+        "**/*credential*"
+      ],
+      "crossModuleThreshold": 2
+    },
+    "maxReviewAttempts": 3
+  },
+  "digest": "4f8d092663b6e283e26ce3026ffce27f49117db2db0fb27080163e034c4c3852"
+}

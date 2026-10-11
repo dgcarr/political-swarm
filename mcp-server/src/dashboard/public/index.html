@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Political Swarm</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="stylesheet" href="/assets/console.css" />
+  </head>
+  <body>
+    <aside id="rail" class="rail" aria-label="Archival video shorts">
+      <section id="newsreel" class="newsreel" aria-label="Archive player" hidden>
+        <header class="newsreel-heading"><span>Archive shorts</span><span class="newsreel-format">VIDEO</span></header>
+        <div class="newsreel-screen">
+          <video id="newsreel-video" class="newsreel-video" muted playsinline aria-hidden="true"></video>
+          <div class="newsreel-grain" aria-hidden="true"></div>
+          <span class="newsreel-badge">ARCHIVE</span>
+        </div>
+        <div class="newsreel-controls">
+          <span class="newsreel-sound">Muted playback</span>
+          <button id="newsreel-pause" type="button" class="toggle newsreel-pause" aria-pressed="false">Pause</button>
+        </div>
+        <p id="newsreel-caption" class="newsreel-caption"></p>
+        <footer class="newsreel-footer">Historical footage <span aria-hidden="true">◆</span> Continuous reel</footer>
+      </section>
+    </aside>
+
+    <div class="page">
+      <header class="masthead">
+        <div class="masthead-title">
+          <h1>Political Swarm</h1>
+          <p class="subtitle">Run monitoring</p>
+        </div>
+        <div class="masthead-meters">
+          <button id="view-toggle" type="button" class="toggle" aria-pressed="false">Compare runs</button>
+          <span id="conn" class="conn" data-state="connecting" title="Dashboard connection">Loading runs</span>
+          <span id="run-status" class="status">—</span>
+          <span id="elapsed" class="meter" title="Time since run creation, including pauses and waiting">—</span>
+          <span class="meter budget" title="Spend against budget">
+            <span id="cost-text">—</span>
+            <span class="budget-bar"><span id="cost-fill" class="budget-fill"></span></span>
+          </span>
+        </div>
+      </header>
+
+      <details class="activity-disclosure">
+        <summary>Live event feed <span class="meta">Expand to follow doctrine activity</span></summary>
+      <section class="ticker-rail" aria-label="Live event feed">
+        <ol id="ticker" class="ticker" aria-live="polite">
+          <li class="ticker-line empty">No run events to display yet.</li>
+        </ol>
+        <figure id="epigraph" class="epigraph">
+          <blockquote id="epigraph-quote"></blockquote>
+          <figcaption id="epigraph-source"></figcaption>
+        </figure>
+      </section>
+
+      </details>
+
+      <section id="gallery" class="gallery" aria-label="All runs" hidden></section>
+
+      <main id="single-view">
+        <section class="runs" aria-labelledby="runs-heading">
+          <div class="runs-title"><h2 id="runs-heading">Runs</h2><span id="run-count" class="meta"></span></div>
+          <label class="sr-only" for="run-search">Search runs</label>
+          <input id="run-search" type="search" placeholder="Search runs…" autocomplete="off" />
+          <div class="run-filters" aria-label="Filter runs">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="active" aria-pressed="false">Active</button>
+            <button type="button" data-filter="attention" aria-pressed="false" title="Runs awaiting a decision, independent review or recovery">Needs attention</button>
+          </div>
+          <div class="run-filters" aria-label="Manage visible runs">
+            <button type="button" id="clear-runs">Clear shown</button>
+            <button type="button" id="restore-runs" hidden>Restore hidden</button>
+          </div>
+          <p id="hidden-runs-note" class="meta" aria-live="polite"></p>
+          <ul id="run-list" class="run-list">
+            <li class="empty">Loading…</li>
+          </ul>
+        </section>
+
+        <section class="detail" aria-labelledby="detail-heading">
+          <h2 id="detail-heading" class="sr-only">Run details</h2>
+          <div id="detail" class="detail-body">
+            <p class="empty">Select a run to view its details.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="run-detail-template">
+      <section class="panel headline">
+        <p class="goal" data-goal></p>
+        <div class="meta" data-headline-meta></div>
+        <div class="run-progress" data-run-progress></div>
+        <p class="error" data-last-error hidden></p>
+      </section>
+
+      <nav class="detail-nav" aria-label="Run sections">
+        <button type="button" data-section="overview" aria-pressed="true">Overview</button>
+        <button type="button" data-section="tasks" aria-pressed="false">Work plan</button>
+        <button type="button" data-section="workers" aria-pressed="false">Workers</button>
+        <button type="button" data-section="ledger" aria-pressed="false">Event log</button>
+      </nav>
+      <section class="panel approvals" data-approvals hidden>
+        <h2 data-heading="approvals">Next action</h2>
+        <ul class="approval-list" data-approval-list></ul>
+      </section>
+
+      <details class="panel statement" data-statement hidden>
+        <summary data-statement-title></summary>
+        <div data-statement-body></div>
+      </details>
+
+      <section class="panel" data-floor>
+        <h2>Worker activity</h2>
+        <div class="workers" data-workers>
+          <p class="empty">No worker has been called yet.</p>
+        </div>
+      </section>
+
+      <section class="panel" data-section-panel="tasks">
+        <h2 data-heading="orderPaper">Tasks</h2>
+        <ul class="tasks" data-tasks>
+          <li class="empty">No tasks have been planned yet.</li>
+        </ul>
+      </section>
+
+      <section class="panel" data-section-panel="ledger">
+        <h2>
+          Event log
+          <span class="ledger-count" data-ledger-count></span>
+          <button type="button" class="toggle" data-ledger-toggle>Raw JSON</button>
+        </h2>
+        <div class="ledger" data-ledger></div>
+      </section>
+    </template>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

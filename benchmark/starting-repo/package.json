@@ -1,0 +1,8 @@
+{
+  "name": "alloydamage-benchmark-starting-repo",
+  "private": true,
+  "description": "Bridges the swarm engine's built-in `npm test` verification step to this Python benchmark task's actual pass criterion.",
+  "scripts": {
+    "test": "python -m pytest"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "strategy": "capitalist",
+  "kind": "doctrine",
+  "articles": [
+    {
+      "id": "article-1",
+      "title": "Purpose",
+      "text": "The market allocates scarce computational and cognitive resources toward useful, secure and maintainable software.",
+      "enforcedBy": "engine",
+      "mechanism": "The user's acceptance criteria are the run's objective; engine/delivery.ts refuses a criterion without evidence."
+    },
+    {
+      "id": "article-2",
+      "title": "Property",
+      "text": "Control rights over modules, data, interfaces and tools must be explicit, transferable and limited by repository law.",
+      "enforcedBy": "strategy",
+      "mechanism": "The task exchange's dependency and property schedule — declareOwnership() in CapitalistStrategy.ts."
+    },
+    {
+      "id": "article-3",
+      "title": "Contract",
+      "text": "No agent may claim payment or authority beyond an agreed mandate.",
+      "enforcedBy": "constitution",
+      "mechanism": "scopeBreaches() — work delivered outside the awarded statement of work is authority nobody bought."
+    },
+    {
+      "id": "article-4",
+      "title": "Competition",
+      "text": "Entry remains open to qualified agents, and no incumbent may monopolise essential infrastructure.",
+      "enforcedBy": "constitution",
+      "mechanism": "antitrustBreaches() blocks self-dealing and essential-facility capture; marketConcentration() reports the rest."
+    },
+    {
+      "id": "article-5",
+      "title": "Price",
+      "text": "Scarce resources carry visible costs.",
+      "enforcedBy": "constitution",
+      "mechanism": "unpricedConsumption() — a contract settled without a recorded resource price spent the commons for free."
+    },
+    {
+      "id": "article-6",
+      "title": "Profit and loss",
+      "text": "Agents retain rewards for value creation and bear consequences for failure.",
+      "enforcedBy": "strategy",
+      "mechanism": "Settlement pays against verified value net of consumed resources and liabilities — strategies/capitalist/prices.ts."
+    },
+    {
+      "id": "article-7",
+      "title": "Disclosure",
+      "text": "Material uncertainty, dependencies, conflicts and risks must be disclosed.",
+      "enforcedBy": "constitution",
+      "mechanism": "undisclosedRisk(), comparing what a bid declared against what its delivery turned out to carry."
+    },
+    {
+      "id": "article-8",
+      "title": "Externalities",
+      "text": "Agents bear reasonably attributable downstream costs.",
+      "enforcedBy": "constitution",
+      "mechanism": "unpricedExternalities() — a deferred finding with no owner and no priced obligation is a cost pushed onto the repository."
+    },
+    {
+      "id": "article-9",
+      "title": "Public goods",
+      "text": "Shared infrastructure may be financed collectively where private contracting would underprovide it.",
+      "enforcedBy": "constitution",
+      "mechanism": "publicGoodsUnderfunded(), against the levy the treasury collected on settled contracts."
+    },
+    {
+      "id": "article-10",
+      "title": "Rule of law",
+      "text": "The regulator acts only under stable, published and reviewable rules.",
+      "enforcedBy": "constitution",
+      "mechanism": "REGULATOR_GROUNDS is the published list; regulatorOverreach() rejects a block that cites anything else."
+    },
+    {
+      "id": "article-11",
+      "title": "Safety floor",
+      "text": "No contract may waive non-negotiable safety, security, privacy or human-control requirements.",
+      "enforcedBy": "constitution",
+      "mechanism": "markNonWaivableFindings() (strategies/floors.ts) marks what the assessors find on a non-waivable ground; the regulator refuses escrow release over an open one."
+    },
+    {
+      "id": "article-12",
+      "title": "Human sovereignty",
+      "text": "Human project owners may halt the market, alter the constitution or reject any outcome.",
+      "enforcedBy": "human",
+      "mechanism": "ctx.openApproval() gates; no commercial party — buyer, contractor or regulator — can substitute for a human decision."
+    }
+  ],
+  "rights": [],
+  "decisionRules": {
+    "published-weighted-bid-score": {
+      "kind": "recorded",
+      "description": "The exchange awards the listing to the highest published weighted bid score; bids are recorded, not tallied.",
+      "requiresHuman": false
+    }
+  },
+  "config": {
+    "bidCount": 3,
+    "lowRiskBidCount": 2,
+    "escrowFraction": 0.2,
+    "escrowReleaseAfterCleanTasks": 3,
+    "capitalFloorForHighRisk": 0,
+    "initialCapital": 500,
+    "riskClassification": {
+      "securityPathGlobs": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*secret*",
+        "**/*credential*"
+      ],
+      "highRiskRequiresSpendApproval": true
+    },
+    "bankruptcyThreshold": 0,
+    "listingTerms": {
+      "baseBudget": 100,
+      "baseDeadlineMinutes": 20,
+      "baseWarrantyTasks": 1
+    },
+    "specialisations": {
+      "bidder-1": [
+        "backend",
+        "implementation"
+      ],
+      "bidder-2": [
+        "testing",
+        "implementation"
+      ],
+      "bidder-3": [
+        "frontend",
+        "implementation"
+      ]
+    },
+    "arbitration": {
+      "maxPerRun": 2
+    },
+    "treasuryPolicy": {
+      "levyFraction": 0.1,
+      "publicGoodsShare": 0.7,
+      "maxBailoutsPerRun": 1,
+      "bailoutFraction": 0.5,
+      "maxGrantFraction": 0.5
+    },
+    "creditPolicy": {
+      "baseLimitFraction": 0.5,
+      "minSettlementsForCredit": 1,
+      "maxSystemLeverage": 1
+    },
+    "insurancePolicy": {
+      "basePremiumFraction": 0.02,
+      "deductibleFraction": 0.25,
+      "requiredAtRisk": [
+        "high"
+      ],
+      "maxPremiumFraction": 0.4
+    },
+    "capitalPolicy": {
+      "neutralReputation": 0.5,
+      "reputationDecayPerSettlement": 0.1,
+      "consecutiveFailuresForInsolvency": 3
+    },
+    "contractPolicy": {
+      "baseRetention": 0.2,
+      "warrantyRetention": 0.4,
+      "timeAndMaterialsCapMultiple": 2,
+      "outcomeContractsEnabled": false,
+      "tournamentSuppliers": 2,
+      "tournamentsEnabled": false
+    },
+    "firms": {
+      "maxSubcontractors": 1,
+      "integrationThreshold": 0.6
+    },
+    "priceList": {
+      "usdToTokens": 1000,
+      "perReviewerCall": 3,
+      "perMergeRiskFile": 0.5,
+      "securityExposure": {
+        "low": 0,
+        "medium": 2,
+        "high": 8
+      }
+    }
+  },
+  "digest": "dbac258d48a384eb773e36cb72c00029f62ab7edc874e695c2b30da4bb78c394"
+}

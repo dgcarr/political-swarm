@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-10-02T23:00:45.491Z",
+  "reports": [
+    {
+      "model": "upstage/solar-decide",
+      "abstained": 0,
+      "ballots": 8,
+      "accuracy": 0.9,
+      "brier": 0.07444210023095002,
+      "floors": [
+        {
+          "floor": 0.6,
+          "fastPathSound": 8,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.7,
+          "fastPathSound": 7,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.8,
+          "fastPathSound": 7,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.85,
+          "fastPathSound": 7,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.9,
+          "fastPathSound": 5,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.95,
+          "fastPathSound": 4,
+          "fastPathDefective": 0
+        }
+      ],
+      "safeFloor": 0.6,
+      "costUsd": 0.0007331499999999999,
+      "medianLatencyMs": 820.5,
+      "errors": []
+    },
+    {
+      "model": "typesafe/jev-1.13",
+      "abstained": 0,
+      "ballots": 8,
+      "accuracy": 0.85,
+      "brier": 0.11529,
+      "floors": [
+        {
+          "floor": 0.6,
+          "fastPathSound": 6,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.7,
+          "fastPathSound": 4,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.8,
+          "fastPathSound": 3,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.85,
+          "fastPathSound": 3,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.9,
+          "fastPathSound": 2,
+          "fastPathDefective": 0
+        },
+        {
+          "floor": 0.95,
+          "fastPathSound": 1,
+          "fastPathDefective": 0
+        }
+      ],
+      "safeFloor": 0.6,
+      "costUsd": 0.000615636,
+      "medianLatencyMs": 286,
+      "errors": []
+    }
+  ]
+}

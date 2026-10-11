@@ -1,0 +1,447 @@
+{
+  "strategy": "democratic",
+  "kind": "doctrine",
+  "articles": [
+    {
+      "id": "article-1",
+      "title": "Purpose",
+      "text": "The swarm exists to produce correct, secure, maintainable and useful software in accordance with explicit human objectives.",
+      "enforcedBy": "engine",
+      "mechanism": "The user acceptance criteria are the run's objective; engine/delivery.ts refuses a criterion without evidence."
+    },
+    {
+      "id": "article-2",
+      "title": "Source of authority",
+      "text": "All agent authority derives from the project charter, approved mandates and repository evidence. No agent possesses inherent ownership of the system.",
+      "enforcedBy": "strategy",
+      "mechanism": "Every office is held for a term and reselected — strategies/democratic/offices.ts."
+    },
+    {
+      "id": "article-3",
+      "title": "Rule of law",
+      "text": "All agents, including the executive, are bound by the same versioned policies, safety rules and audit requirements.",
+      "enforcedBy": "engine",
+      "mechanism": "config/checks.yaml commands are engine-owned and never taken from model output."
+    },
+    {
+      "id": "article-4",
+      "title": "Responsible executive",
+      "text": "The executive coordinates implementation only while it retains the confidence of the Code Commons.",
+      "enforcedBy": "strategy",
+      "mechanism": "The confidence motion in strategies/democratic/cabinet.ts."
+    },
+    {
+      "id": "article-5",
+      "title": "Opposition",
+      "text": "A recognised opposition must have access to the evidence needed to challenge executive claims and propose an alternative programme.",
+      "enforcedBy": "strategy",
+      "mechanism": "The Opposition receives the actual diff and check results — strategies/democratic/opposition.ts."
+    },
+    {
+      "id": "article-6",
+      "title": "Separation of functions",
+      "text": "No consequential change may be proposed, implemented, approved and adjudicated solely by the same agent or tightly coupled agent group.",
+      "enforcedBy": "constitution",
+      "mechanism": "separationOfFunctionsBreaches() below, plus engine/delivery.ts's verifier-is-not-integrator rule."
+    },
+    {
+      "id": "article-7",
+      "title": "Evidence",
+      "text": "Technical decisions must be justified by inspectable evidence appropriate to their risk.",
+      "enforcedBy": "engine",
+      "mechanism": "Evidence status is resolved from the checks that actually ran, never from an agent's report."
+    },
+    {
+      "id": "article-8",
+      "title": "Minority reports",
+      "text": "Material dissent must be preserved with the final decision.",
+      "enforcedBy": "constitution",
+      "mechanism": "droppedMinorityReports() below; the Speaker re-marks anything the disposition step downgraded."
+    },
+    {
+      "id": "article-9",
+      "title": "Rotation and recall",
+      "text": "Governance offices are temporary and subject to recall, review and periodic reselection.",
+      "enforcedBy": "strategy",
+      "mechanism": "rotateOffices() and recallRepresentative() in strategies/democratic/offices.ts."
+    },
+    {
+      "id": "article-10",
+      "title": "Constitutional constraints",
+      "text": "Security, safety, privacy, licensing and human-control requirements cannot be overridden by an ordinary majority.",
+      "enforcedBy": "constitution",
+      "mechanism": "isNonWaivableGround() below; the gate refuses assent while such a finding is open."
+    },
+    {
+      "id": "article-11",
+      "title": "Transparency",
+      "text": "Plans, votes, amendments, implementation records, test results and unresolved risks must be recorded.",
+      "enforcedBy": "engine",
+      "mechanism": "The append-only ledger (engine/Ledger.ts) and the delivery packet."
+    },
+    {
+      "id": "article-12",
+      "title": "Human sovereignty",
+      "text": "Human project owners retain final constitutional authority and may halt, amend or dissolve the swarm.",
+      "enforcedBy": "human",
+      "mechanism": "swarm_stop, swarm_decide and Claude's independent check of the delivery packet."
+    }
+  ],
+  "rights": [
+    {
+      "id": "evidence-access",
+      "text": "Access to relevant evidence.",
+      "mechanism": "Every reviewing office receives the diff and check summary."
+    },
+    {
+      "id": "record-dissent",
+      "text": "The right to record dissent.",
+      "mechanism": "A non-approve verdict on a carried motion becomes a minority finding."
+    },
+    {
+      "id": "propose-amendments",
+      "text": "The right to propose amendments.",
+      "mechanism": "Committee and Opposition findings return to the executive."
+    },
+    {
+      "id": "challenge-executive",
+      "text": "The right to challenge an executive claim.",
+      "mechanism": "The Opposition brief, answered by the government reply."
+    },
+    {
+      "id": "abstain",
+      "text": "The right to abstain when context is inadequate.",
+      "mechanism": "An \"abstain\" verdict is excluded from the division denominator."
+    },
+    {
+      "id": "no-retaliation",
+      "text": "Protection from retaliation for accurate criticism.",
+      "mechanism": "Findings are addressed by disposition, never deleted."
+    },
+    {
+      "id": "equal-treatment",
+      "text": "Equal procedural treatment.",
+      "mechanism": "The Speaker applies the same admissibility screen to every motion."
+    },
+    {
+      "id": "appeal",
+      "text": "Access to appeal.",
+      "mechanism": "A defeated motion may appeal once to the House of Review."
+    },
+    {
+      "id": "notice",
+      "text": "Notice before mandate termination.",
+      "mechanism": "Recall and resignation are recorded before the office changes hands."
+    },
+    {
+      "id": "minority-preserved",
+      "text": "Preservation of minority reports.",
+      "mechanism": "Article 8; the Speaker's retention check."
+    },
+    {
+      "id": "conflict-disclosure",
+      "text": "Disclosure of conflicts of interest.",
+      "mechanism": "separationOfFunctionsBreaches(), recorded as conflict_declared."
+    }
+  ],
+  "decisionRules": {
+    "simple_majority": {
+      "kind": "threshold",
+      "description": "More ayes than noes among votes cast; abstentions do not count.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.5,
+      "denominator": "cast",
+      "strict": true,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "approved",
+          "rejected",
+          "needs_human"
+        ],
+        "failed": [
+          "rejected",
+          "needs_human"
+        ]
+      }
+    },
+    "three_fifths": {
+      "kind": "threshold",
+      "description": "At least three fifths of votes cast are ayes.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.6,
+      "denominator": "cast",
+      "strict": false,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "approved",
+          "rejected",
+          "needs_human"
+        ],
+        "failed": [
+          "rejected",
+          "needs_human"
+        ]
+      }
+    },
+    "two_thirds_plus_security_committee": {
+      "kind": "threshold",
+      "description": "At least two thirds of votes cast are ayes, then a binding Security Committee vote and human sign-off.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.6666666666666666,
+      "denominator": "cast",
+      "strict": false,
+      "requiresHuman": true,
+      "results": {
+        "carried": [
+          "needs_human"
+        ],
+        "failed": [
+          "needs_human"
+        ]
+      }
+    },
+    "two_thirds_both_chambers": {
+      "kind": "threshold",
+      "description": "Ayes from at least two thirds of every seated member, so abstentions cannot manufacture it; then the House of Review and human sign-off.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.6666666666666666,
+      "denominator": "eligible",
+      "strict": false,
+      "requiresHuman": true,
+      "results": {
+        "carried": [
+          "needs_human"
+        ],
+        "failed": [
+          "needs_human"
+        ]
+      }
+    },
+    "human_required": {
+      "kind": "threshold",
+      "description": "A human decides. The division (two thirds of votes cast) is advisory.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.6666666666666666,
+      "denominator": "cast",
+      "strict": false,
+      "requiresHuman": true,
+      "results": {
+        "carried": [
+          "needs_human"
+        ],
+        "failed": [
+          "needs_human"
+        ]
+      }
+    },
+    "equal-ballot-plurality-quorum-half-tie-roster-order-v1": {
+      "kind": "plurality",
+      "description": "The candidate with most votes wins if half the electorate cast a ballot; a tie goes to roster order.",
+      "quorum": {
+        "fraction": 0.5,
+        "of": "participating",
+        "strict": false
+      },
+      "abstain": "abstain",
+      "noWinner": "no-mandate",
+      "requiresHuman": false
+    },
+    "equal-representative-ballot-quorum-half-simple-majority-v1": {
+      "kind": "threshold",
+      "description": "Confidence is lost only when more representatives vote no than aye, with half of them taking part.",
+      "inFavour": "no",
+      "against": [
+        "aye"
+      ],
+      "fraction": 0.5,
+      "denominator": "cast",
+      "strict": true,
+      "quorum": {
+        "fraction": 0.5,
+        "of": "participating",
+        "strict": false
+      },
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "lost"
+        ],
+        "failed": [
+          "sustained"
+        ]
+      }
+    },
+    "simple-majority-of-engaged-with-quorum": {
+      "kind": "threshold",
+      "description": "A minority amendment: more ayes than noes, with an absolute majority of engaged members voting.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.5,
+      "denominator": "cast",
+      "strict": true,
+      "quorum": {
+        "fraction": 0.5,
+        "of": "voting",
+        "strict": true
+      },
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "adopted"
+        ],
+        "failed": [
+          "defeated"
+        ]
+      }
+    },
+    "two-thirds-of-all-seated-members": {
+      "kind": "threshold",
+      "description": "House of Review: ayes from two thirds of every seated member.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.6666666666666666,
+      "denominator": "eligible",
+      "strict": false,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "carried"
+        ],
+        "failed": [
+          "defeated"
+        ]
+      }
+    },
+    "two-thirds-of-seated-security-panel": {
+      "kind": "threshold",
+      "description": "Security Committee: ayes from two thirds of every seated member.",
+      "inFavour": "aye",
+      "against": [
+        "no"
+      ],
+      "fraction": 0.6666666666666666,
+      "denominator": "eligible",
+      "strict": false,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "approved"
+        ],
+        "failed": [
+          "withheld"
+        ]
+      }
+    }
+  },
+  "config": {
+    "voteThresholds": {
+      "routine": "simple_majority",
+      "cross_module": "three_fifths",
+      "security_boundary": "two_thirds_plus_security_committee",
+      "constitutional_amendment": "two_thirds_both_chambers",
+      "test_waiver": "human_required"
+    },
+    "riskClassification": {
+      "securityPathGlobs": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*secret*",
+        "**/*credential*"
+      ],
+      "crossModuleThreshold": 2
+    },
+    "committee": {
+      "electedSpecialistCalls": 2,
+      "sortitionCalls": 1,
+      "expeditedElectedSpecialistCalls": 1,
+      "expeditedSortitionCalls": 0
+    },
+    "confidenceVote": {
+      "consecutiveFailuresBeforeSwap": 3
+    },
+    "questionTimeEveryNTasks": 5,
+    "constituencies": [
+      "frontend",
+      "backend",
+      "data",
+      "security",
+      "testing",
+      "documentation",
+      "user-experience",
+      "operations"
+    ],
+    "cabinet": {
+      "portfolios": [
+        "architecture",
+        "implementation",
+        "verification",
+        "security",
+        "integration",
+        "documentation",
+        "release-operations"
+      ],
+      "collectiveResponsibility": true
+    },
+    "shadowCabinet": {
+      "architecture": "shadow-architecture-reviewer",
+      "security": "shadow-security-reviewer",
+      "verification": "shadow-verification-lead",
+      "testing": "shadow-verification-lead",
+      "release-operations": "shadow-release-reviewer",
+      "default": "shadow-general-reviewer"
+    },
+    "offices": {
+      "termLengthInTasks": 6,
+      "candidatesPerOffice": 3,
+      "constituentBallots": true,
+      "votersPerConstituency": 2,
+      "seed": "run-id"
+    },
+    "speaker": {
+      "admissibilityRuling": true,
+      "duplicateTitleSimilarity": 0.85,
+      "maxMotionsPerReading": 12
+    },
+    "debate": {
+      "governmentReplyOnObjection": true,
+      "maxRoundsPerMotion": 1
+    },
+    "houseOfReview": {
+      "enabled": true,
+      "minRiskClass": "medium",
+      "maxDelays": 1
+    },
+    "confidence": {
+      "governmentFailuresBeforeMotion": 3,
+      "representativeRecallFailures": 3
+    },
+    "ceremonialHead": {
+      "emergencyRollbackAfterRemediationCycles": 2
+    },
+    "accountability": {
+      "postImplementationReport": true
+    }
+  },
+  "digest": "4abecd894497a4d268bb33b5fb0654e92f9317141498c79278333ed176cd7715"
+}

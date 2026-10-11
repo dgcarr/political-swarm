@@ -1,0 +1,221 @@
+{
+  "strategy": "socialist",
+  "kind": "doctrine",
+  "articles": [
+    {
+      "id": "article-1",
+      "title": "Purpose",
+      "text": "The swarm exists to satisfy the user's stated task by producing correct, maintainable and verifiable software.",
+      "enforcedBy": "engine",
+      "mechanism": "The user acceptance criteria are the run's objective; engine/delivery.ts refuses a criterion without evidence."
+    },
+    {
+      "id": "article-2",
+      "title": "Common ownership",
+      "text": "The repository, tools, task records and work-produced knowledge form a commons available to the whole swarm subject only to necessary safety controls.",
+      "enforcedBy": "constitution",
+      "mechanism": "unpublishedKnowledge() — a failure that taught the swarm something and was not written back is privatised knowledge."
+    },
+    {
+      "id": "article-3",
+      "title": "Worker self-management",
+      "text": "Workers participate in planning and governing their work and retain discretion over implementation within agreed interfaces and constraints.",
+      "enforcedBy": "strategy",
+      "mechanism": "Collective reconnaissance feeds the plan, and a worker may return an assignment — strategies/socialist/allocation.ts."
+    },
+    {
+      "id": "article-4",
+      "title": "Allocation",
+      "text": "Work is allocated according to capability and capacity; resources and mutual aid are allocated according to demonstrated need, difficulty and risk.",
+      "enforcedBy": "strategy",
+      "mechanism": "The needs assessment sets each node's share of context and aid — strategies/socialist/allocation.ts."
+    },
+    {
+      "id": "article-5",
+      "title": "Delegation",
+      "text": "Coordination authority is explicit, narrow, temporary, transparent and recallable. It conveys no ownership or permanent status.",
+      "enforcedBy": "constitution",
+      "mechanism": "mandateBreaches() bounds what the coordinating council may decide; its term and recall live in coordinating.ts."
+    },
+    {
+      "id": "article-6",
+      "title": "Federation",
+      "text": "Decisions remain with the smallest affected council unless cross-council dependencies require collective coordination.",
+      "enforcedBy": "constitution",
+      "mechanism": "mandateBreaches() rejects a coordinating decision on a matter one council could settle alone."
+    },
+    {
+      "id": "article-7",
+      "title": "Knowledge",
+      "text": "Findings, decisions, evidence, reusable artefacts and failure lessons must be published to the shared commons.",
+      "enforcedBy": "constitution",
+      "mechanism": "unpublishedKnowledge(), against the run's KnowledgeStore writes."
+    },
+    {
+      "id": "article-8",
+      "title": "Verification",
+      "text": "Consequential work requires review independent of its authorship, and correctness is determined by relevant reproducible evidence.",
+      "enforcedBy": "constitution",
+      "mechanism": "selfApprovalBreaches(); the engine separately refuses a manifest whose verifier performed the integration."
+    },
+    {
+      "id": "article-9",
+      "title": "Right to challenge",
+      "text": "Councils and workers may challenge plans, evidence and coordinators without retaliation; minority reports remain visible.",
+      "enforcedBy": "constitution",
+      "mechanism": "droppedMinorityReports(), re-marking any dissent the disposition step converted into consensus."
+    },
+    {
+      "id": "article-10",
+      "title": "Rotation and recall",
+      "text": "Coordinating and review offices rotate, remain recallable and may not monopolise information, tools or merge authority.",
+      "enforcedBy": "constitution",
+      "mechanism": "monopolyBreaches(); rotation and recall cadence in coordinating.ts and councils.ts."
+    },
+    {
+      "id": "article-11",
+      "title": "Recovery",
+      "text": "Failure is disclosed, contained, analysed and converted into shared learning; blame may not substitute for diagnosis and repair.",
+      "enforcedBy": "constitution",
+      "mechanism": "blameWithoutDiagnosis() — a reassignment recorded with no cause is blame standing in for diagnosis."
+    },
+    {
+      "id": "article-12",
+      "title": "Human sovereignty",
+      "text": "Claude and the swarm remain bound by the user's lawful instructions, declared acceptance criteria and required human approval boundaries.",
+      "enforcedBy": "human",
+      "mechanism": "ctx.openApproval() gates; no council decision can substitute for a human one."
+    }
+  ],
+  "rights": [],
+  "decisionRules": {
+    "member-council-ratification-v1": {
+      "kind": "threshold",
+      "description": "A plan is ratified by approvals from an absolute majority of council members.",
+      "inFavour": "approve",
+      "against": [
+        "amend",
+        "reject"
+      ],
+      "fraction": 0.5,
+      "denominator": "eligible",
+      "strict": true,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "approve"
+        ],
+        "failed": [
+          "amend",
+          "reject"
+        ]
+      }
+    },
+    "member-council-majority-acceptance-v1": {
+      "kind": "threshold",
+      "description": "Delivery is accepted by approvals from an absolute majority of council members.",
+      "inFavour": "approve",
+      "against": [
+        "reject"
+      ],
+      "fraction": 0.5,
+      "denominator": "eligible",
+      "strict": true,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "approve"
+        ],
+        "failed": [
+          "reject"
+        ]
+      }
+    },
+    "member-initiated-absolute-majority-recall-v1": {
+      "kind": "threshold",
+      "description": "A delegate is recalled by an absolute majority of council members.",
+      "inFavour": "recall",
+      "against": [
+        "retain"
+      ],
+      "fraction": 0.5,
+      "denominator": "eligible",
+      "strict": true,
+      "requiresHuman": false,
+      "results": {
+        "carried": [
+          "recalled"
+        ],
+        "failed": [
+          "retained"
+        ]
+      }
+    }
+  },
+  "config": {
+    "guilds": [
+      "frontend",
+      "backend",
+      "testing",
+      "security",
+      "docs",
+      "architecture"
+    ],
+    "initialCapabilityScore": 0.5,
+    "councils": {
+      "membersPerGuild": 2,
+      "requirePlanRatification": true,
+      "memberBallots": true,
+      "seed": "run-id"
+    },
+    "coordinating": {
+      "termLengthInTasks": 6,
+      "mandate": [
+        "ordering",
+        "interface",
+        "scarce-resource"
+      ],
+      "requireProductiveDuty": true
+    },
+    "reconnaissance": {
+      "maxCouncils": 2,
+      "requireProposedTests": true
+    },
+    "allocation": {
+      "resourceEnvelopes": true,
+      "needsWeighting": {
+        "riskClass": 2,
+        "breadth": 1,
+        "dependencies": 1,
+        "priorRejections": 2
+      },
+      "lessonBudget": {
+        "min": 3,
+        "max": 8
+      },
+      "returnsBeforeReplan": 2
+    },
+    "mutualAid": {
+      "enabled": true,
+      "rejectionsBeforeAid": 1
+    },
+    "recovery": {
+      "failuresBeforeDiagnosis": 2,
+      "maxAttemptsPerNode": 3,
+      "appealOnScopeChange": true
+    },
+    "recall": {
+      "consecutivePlannerFailuresBeforeSwap": 3,
+      "delegateMisallocations": 3
+    },
+    "escalateToHuman": {
+      "securityPathGlobs": [
+        "**/auth/**",
+        "**/security/**",
+        "**/*secret*",
+        "**/*credential*"
+      ]
+    }
+  },
+  "digest": "c5f92c1227e7f897171939053bc4eb98c156a2ddd24a8376b62553f19414b441"
+}
