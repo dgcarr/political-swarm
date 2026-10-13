@@ -15,6 +15,14 @@ one part of the three doctrines that does not differ. It defines a doctrine-neut
 Everything below follows from that division: the engine owns **sequence and floors**, the strategies
 own **judgment**, and the human owns **the criteria and the final say**.
 
+For everyday prompts, Claude prepares the brief before starting: it preserves explicit criteria
+verbatim, derives observable requirements from inspected context with an `Inferred:` prefix, and
+records consequential defaults as `Assumption:` constraints. These inferred requirements join the
+top-level evidence matrix without becoming claims that the user explicitly specified them. Claude
+briefly discloses assumptions and proceeds unless a consequential unresolved choice needs an answer.
+The human's instructions always override inferred scope; applying the result remains a separate
+confirmation. This is orchestrator guidance, not server-side generation for callers that omit criteria.
+
 ---
 
 ## 1. The run lifecycle
@@ -95,7 +103,7 @@ partial work as accepted."
 | §10 Non-waivable floor above the doctrine's own procedure | A `nonWaivable` finding cannot be dispositioned `accepted` without being remedied. Findings are put on the floor by the ground their text names (security, safety, privacy, licensing, human-control, test-integrity, acceptance-evidence). The patterns match words, not stems: "authored" is not authentication, model token counts are not credentials, and "weakening a requirement" is test-integrity only when a test or assertion is weakened | `SwarmEngine.runAcceptanceBarriers`, `strategies/floors.ts` |
 | §10 Internal approval never binds Claude | `awaiting_acceptance` ≠ `completed`; `swarm_apply` refuses every other status | `tools/swarmApply.ts` |
 | Benchmark external oracle | The live worktree must pass all 12 evaluator-owned checks; exact results are preserved in `DeliveryPacket.externalEvaluations` | `mcp-server/src/benchmark/runBenchmark.ts`, `benchmark/oracle/` |
-| §12 Human sovereignty | Acceptance criteria passed verbatim; approvals resolved only by the user; `/swarm-apply` needs explicit in-chat confirmation. In the headless benchmark only, the user's selected Claude model stands in as sovereign for doctrine escalations, and a fixed per-arm allowance decides budget and time extensions (`benchmark/README.md`) | `commands/*.md`, `mcp-server/src/benchmark/sovereign.ts` |
+| §12 Human sovereignty | Explicit acceptance criteria passed verbatim; inferred additions labeled and assumptions disclosed; consequential ambiguity resolved before starting; approvals resolved only by the user; `/swarm-apply` needs explicit in-chat confirmation. In the headless benchmark only, the user's selected Claude model stands in as sovereign for doctrine escalations, and a fixed per-arm allowance decides budget and time extensions (`benchmark/README.md`) | `commands/*.md`, `mcp-server/src/benchmark/sovereign.ts` |
 
 ## 4. The same barrier, three institutions
 

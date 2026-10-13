@@ -25,7 +25,10 @@ stop — there is nothing to accept.
 
 **Then do the check yourself. Reading the packet is not the check.**
 
-1. **Trace every acceptance criterion.** For each entry in `requirementMatrix`, find the code in the
+1. **Trace every acceptance criterion.** This includes `Inferred: ` criteria prepared at start: they
+   require the same evidence as explicit criteria. Recheck recorded `Assumption: ` constraints against
+   the original request and repository context; a passing test does not justify a wrong assumption.
+   Do not drop or rewrite a criterion to accept a failing delivery. For each entry in `requirementMatrix`, find the code in the
    diff that implements it and the command whose result demonstrates it. A criterion whose status is
    not `satisfied` is unmet until you can show otherwise. `independentCheck.criteriaWithoutSatisfyingEvidence`
    lists these, but do not trust the list over your own reading of the diff.

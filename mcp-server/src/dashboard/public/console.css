@@ -34,6 +34,24 @@ body { grid-template-columns: minmax(0, 1fr) 220px; }
 .headline .meta { font-size: .7rem; overflow-wrap: anywhere; }
 .run-progress { display: flex; align-items: center; gap: 14px; margin-top: 16px; color: var(--muted); font: .72rem ui-monospace, monospace; }
 .run-progress progress { width: 120px; height: 5px; accent-color: var(--accent); border: 0; background: var(--line); }
+.task-progress-track { position: relative; display: inline-flex; width: 120px; height: 5px; overflow: hidden; }
+.task-progress-track progress { display: block; margin: 0; }
+.task-progress-track.is-active::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: task-progress-sweep 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes task-progress-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(350%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .task-progress-track.is-active::after { animation: none; display: none; }
+}
 progress::-webkit-progress-bar { background: var(--line); }
 progress::-webkit-progress-value { background: var(--accent); }
 progress::-moz-progress-bar { background: var(--accent); }
@@ -154,10 +172,16 @@ body:has(.newsreel[hidden]) { grid-template-columns: minmax(0, 1fr); }
 .activity-disclosure .epigraph { display: none; }
 .activity-disclosure .ticker-rail { grid-template-columns: minmax(0, 1fr); }
 .detail-body:not([data-section='workers']) [data-floor],
+.detail-body:not([data-section='overview']) [data-section-panel='overview'],
 .detail-body:not([data-section='tasks']) [data-section-panel='tasks'],
 .detail-body:not([data-section='ledger']) [data-section-panel='ledger'] { display: none; }
 .detail-body[data-section='workers'] [data-floor] { display: block; }
 .statement > summary { cursor: pointer; padding: 12px; font-size: .8rem; }
+.overview { order: 2; }
+.overview > p { line-height: 1.5; }
+.overview-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; }
+.overview-metrics dt { color: var(--muted); font-size: .75rem; }
+.overview-metrics dd { margin: 6px 0 0; overflow-wrap: anywhere; }
 .run-list .run-card .run-flag { background: transparent; color: var(--muted); padding-top: 8px; }
 .run-card .meta > span + span { display: none; }
 .detail-nav { flex-wrap: wrap; gap: 18px; }

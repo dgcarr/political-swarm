@@ -592,12 +592,50 @@
     meter.max = Math.max(1, nodes.length);
     meter.value = settled;
     meter.setAttribute('aria-label', 'Tasks settled');
-    progress.appendChild(meter);
+    const track = el('span', 'task-progress-track');
+    track.classList.toggle('is-active', ['running', 'remediation'].includes(state.status));
+    track.appendChild(meter);
+    progress.appendChild(track);
     const active = nodes.filter((node) => node.phase === 'running').length;
     const blocked = nodes.filter((node) => node.phase === 'blocked').length;
     progress.appendChild(el('span', null, `${active} running · ${blocked} blocked`));
     refs.lastError.hidden = !state.lastError;
     if (state.lastError) refs.lastError.textContent = state.lastError;
+    renderOverview();
+  }
+
+  function renderOverview() {
+    const state = view.state;
+    const nodes = Object.values(state.graph?.nodes || {});
+    const outcomes = {
+      completed: 'Delivery accepted after independent review.',
+      awaiting_acceptance: 'The swarm submitted its delivery. Independent review is still required.',
+      paused_budget: 'Paused at a resource limit. A decision is required to continue.',
+      paused_human: 'Paused while awaiting a human decision.',
+      interrupted: 'Execution was interrupted. The run can be resumed.',
+      failed: 'The run failed. Review the error and event log for details.',
+      stopped: 'The run was stopped before completion.',
+      terminated_incomplete: 'The run ended without an accepted delivery.',
+      remediation: 'The swarm is addressing review findings.',
+      running: nodes.length ? 'The swarm is implementing and reviewing the work.' : 'The swarm is inspecting the repository and preparing its plan.',
+    };
+    detailEl.querySelector('[data-overview-outcome]').textContent = outcomes[state.status] || words(state.status);
+    const metrics = detailEl.querySelector('[data-overview-metrics]');
+    clear(metrics);
+    const approved = nodes.filter((node) => taskDisplayStatus(node) === 'approved').length;
+    const pending = (state.pendingApprovals || []).filter((approval) => !approval.resolvedAt).length;
+    for (const [label, value] of [
+      ['Status', words(state.status)],
+      ['Tasks approved', `${approved} / ${nodes.length}`],
+      ['Spend / budget', `$${Number(state.costUsd || 0).toFixed(4)} / $${Number(state.budgetUsd || 0).toFixed(2)}`],
+      ['Worker calls', String(state.workerCalls || 0)],
+      ['Pending decisions', String(pending)],
+      ['Last updated', new Date(state.updatedAt || state.createdAt).toLocaleString()],
+    ]) {
+      const item = el('div');
+      item.append(el('dt', null, label), el('dd', null, value));
+      metrics.appendChild(item);
+    }
   }
 
   function renderApprovals() {

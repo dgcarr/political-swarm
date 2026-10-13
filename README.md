@@ -104,6 +104,15 @@ branch (`/swarm-start ... --base-branch=master`, the `baseBranch` argument of `s
 category runs `npm test`; for a Python or other non-npm repository, edit it first — see
 [`docs/Configuration.md`](docs/Configuration.md).
 
+Everyday prompts do not need a formal specification. `/swarm-start` inspects relevant context,
+preserves explicit criteria, and adds a small checkable checklist labeled `Inferred:`. Consequential
+defaults are recorded as `Assumption:` constraints and briefly disclosed before starting. Claude asks
+only about important unresolved choices, not routine implementation details or checklist approval.
+The current repository and established strategy are reused; without a strategy preference it uses
+socialist and says so. Inferred criteria become top-level requirements with the same evidence checks.
+This preparation is Claude's workflow (also described by the MCP tool); the server does not itself
+generate criteria for API clients that pass an empty list. Applying changes still requires confirmation.
+
 ### Try it without a key
 
 ```bash

@@ -104,7 +104,20 @@ function registerTools(server: McpServer, dependencies: Dependencies, dashboard:
   const { client, modelsConfig, engine } = dependencies;
   server.registerTool(
     'swarm_start',
-    { description: 'Start a governance-driven code swarm on a task.', inputSchema: swarmStartInputShape },
+    {
+      description:
+        'Start a governance-driven code swarm on a task. Before calling, turn everyday, detail-light ' +
+        'requests into a self-contained brief using focused repository inspection and conversation context. ' +
+        'Preserve explicit acceptance criteria verbatim; add observable, testable criteria prefixed ' +
+        '"Inferred: " when needed and pass them in acceptanceCriteria. Record consequential defaults as ' +
+        '"Assumption: ... (basis: ...)" in constraints, alongside scope and known validation commands. ' +
+        'Briefly disclose important assumptions and proceed without routine confirmation. Ask only when ' +
+        'an unresolved choice materially affects behavior, scope, data, security, compatibility, cost or ' +
+        'irreversible actions; wait for that answer. Do not invent essential domain rules or authorization. ' +
+        'Use the established repository and strategy; absent a strategy preference, disclose and use socialist. ' +
+        'Honor an explicit request not to infer criteria. Never silently weaken criteria to pass checks.',
+      inputSchema: swarmStartInputShape,
+    },
     adaptToolHandler((input) => swarmStart(engine, defaultRepoPath, input)),
   );
 

@@ -1,7 +1,7 @@
 ---
 description: Start a governance-driven code swarm on a task
 argument-hint: [task description] [--strategy=democratic|socialist|capitalist] [--budget=usd] [--repo=path] [--base-branch=name]
-allowed-tools: mcp__plugin_political-swarm_swarm__swarm_start, AskUserQuestion
+allowed-tools: mcp__plugin_political-swarm_swarm__swarm_start, AskUserQuestion, Read, Glob, Grep, Bash(git status:*), Bash(git symbolic-ref:*), Bash(git branch:*)
 ---
 
 <!--
@@ -15,18 +15,67 @@ internal decision procedure.
 
 Parse `$ARGUMENTS` for the task description and any `--strategy=`, `--budget=`, `--repo=`, or `--base-branch=` flags (`--base-branch` becomes `baseBranch`).
 
-If `--strategy` was not given, ask the user (via AskUserQuestion) to pick one, briefly describing each:
+Use the strategy selected in this conversation or `--strategy`. If neither exists, use `socialist`
+and disclose that default briefly; do not require an everyday user to choose a governance model.
+If the user asks about alternatives, describe them:
 - **democratic** — Westminster-style: committees + an adversarial opposition review every change, votes decide merges with thresholds scaled to risk (simple majority for routine work, supermajority + Security Committee for security-boundary changes).
 - **socialist** — a federated council swarm: worker councils inspect the repository before the plan is written, a rotating coordinating council holds a bounded, recallable mandate, specialist guilds advise across councils, no agent reviews its own work, and overruled objections survive as minority reports.
 - **capitalist** — an internal task-exchange: worker personas bid on subtasks, work is awarded by expected value (not just lowest price), and capital/reputation accounts gate who can take on risky work.
 
-Determine `repoPath`: use `--repo=` if given, otherwise the current project's working directory. Confirm this is the correct target with the user before proceeding — the swarm will create an isolated git worktree and branch there, and never touches the real working tree until `/swarm-apply` is run and explicitly confirmed.
+Determine `repoPath`: use `--repo=` if given, otherwise the current project's working directory.
+Use an already-established target without asking again. Ask only when multiple plausible targets
+remain or no Git repository can be identified. The swarm creates an isolated worktree; applying
+changes still requires the separate `/swarm-apply` confirmation.
 
-Capture the acceptance criteria **verbatim** from the user and pass them through unchanged. They are
-sovereign over both Claude and the swarm, they become the requirement-to-test matrix the swarm must
-produce evidence against, and they are what you will check the delivery against at the end. If they
-are ambiguous, ask the user to clarify before starting rather than interpreting them yourself — no
-interpretation may silently replace the user's instruction.
+### Turn an everyday prompt into a checkable brief
+
+Expect short, blunt, misspelled or detail-light requests such as "fix the search" or "add CSV export".
+Do this preparation yourself; do not ask the user to write a specification or acceptance criteria.
+
+1. Read the relevant repository instructions, entry points, existing behavior, tests and check
+   commands. Use focused inspection, not a repository-wide audit. Reuse context already established
+   in the conversation. Never claim to have inspected something you could not access.
+2. Preserve every explicit user criterion **verbatim** in `acceptanceCriteria`. User instructions
+   override inferred requirements. When criteria are absent or incomplete, derive a small checklist
+   of observable behavior from the request and inspected context. Include the main success case,
+   relevant edge/failure behavior, compatibility that matters, and evidence that would demonstrate
+   success. Do not pad simple work into a large feature, invent performance targets, add dependencies,
+   or promise unrelated cleanup. A spelling error is not an ambiguity when intent is clear.
+3. Prefix each added criterion with `Inferred: `; keep that exact text throughout the evidence matrix.
+   Record consequential defaults separately in `constraints` as `Assumption: ... (basis: ...)`.
+   Cite a concrete file, established convention or conservative default as the basis; distinguish
+   inspected facts from guesses. Also carry scope boundaries and known validation commands in
+   `constraints`. Do not invent command names or treat file existence as proof of correct behavior.
+   Criteria and assumptions must travel in the actual tool arguments, not only in chat.
+4. Ask a focused question only if an unresolved choice materially changes user-visible behavior,
+   scope, data handling, security, compatibility, cost or an irreversible action, and the repository
+   and conversation do not settle it. Explain the practical choice in plain language. Batch related
+   blocking choices into one short question with a recommended option. Wait for the answer before
+   starting dependent work. Do not invent essential domain rules, missing secrets, or authorization.
+   Routine implementation details and reversible defaults do not require approval.
+5. Otherwise show a short statement of what you will do and the important assumption(s), then start
+   immediately. This is disclosure, not a request to approve a checklist. Keep the full brief in the
+   tool call; do not overwhelm the user with internal process. If the user explicitly asks for no
+   inference, honor that and retain their scope; disclose any verification gap instead of fabricating
+   criteria.
+
+Keep `task` self-contained: preserve the user's request, add only the relevant inspected context,
+and identify the intended output and boundaries. Never send only a pointer to another instruction
+file. Leave task decomposition, worker ownership and internal decisions to the selected doctrine.
+Use the prepared checklist as the top-level `acceptanceCriteria`, so inferred requirements receive
+the same evidence checks as explicit ones. Do not silently relax it after a failed check.
+
+Examples:
+- "fix the search" with a reproduced regression and existing tests: describe the observed failure,
+  infer restoration of that behavior plus a regression test, preserve existing search conventions,
+  and proceed. If neither context nor inspection identifies what is broken, ask what the user sees
+  and what they expected instead of inventing a bug.
+- "add CSV export" on an existing table: infer export of its displayed columns using the current
+  export conventions, escaping commas/quotes/newlines and a content-level test. If filtered versus
+  all-record export has no established convention and changes the intended scope, ask that one
+  question; do not ask the user to choose a parser library or write test cases.
+- "delete old customer records": ask about the retention cutoff and deletion semantics if not
+  established; never guess a destructive policy.
 
 Exactly one doctrine runs per task. Do not offer to run two for comparison within a single run, and
 do not mix mechanisms between them.
