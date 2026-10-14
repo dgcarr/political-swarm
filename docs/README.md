@@ -23,6 +23,7 @@ These documents support extension and evaluation; they are not required to insta
 
 - [Contributing](../CONTRIBUTING.md) and [adding a governance model](Adding-A-Governance-Model.md)
 - [Benchmark task](Coding-Swarm-Benchmark.md) and [benchmark harness](../benchmark/README.md)
+- [Benchmark results](Benchmark-Results.md): historical measurements and their limits
 - [Historical oracle audit](Oracle-Audit-2026-09-24.md), retained as evidence for the reported benchmark history
 
 Retired implementation plans, session handoffs, launch checklists, and design-review snapshots remain available in Git history. They are not maintained deployment documentation.
