@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f \"${CLAUDE_PROJECT_DIR:-.}/graphify-out/.graphify_extracting\" ] || graphify hook-guard search",
+            "command": "if command -v graphify >/dev/null 2>&1; then [ -f \"${CLAUDE_PROJECT_DIR:-.}/graphify-out/.graphify_extracting\" ] || graphify hook-guard search; fi",
             "timeout": 10
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f \"${CLAUDE_PROJECT_DIR:-.}/graphify-out/.graphify_extracting\" ] || graphify hook-guard read",
+            "command": "if command -v graphify >/dev/null 2>&1; then [ -f \"${CLAUDE_PROJECT_DIR:-.}/graphify-out/.graphify_extracting\" ] || graphify hook-guard read; fi",
             "timeout": 10
           }
         ]

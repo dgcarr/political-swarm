@@ -15,3 +15,11 @@ __pycache__/
 *.pyc
 graphify-out/
 graphify-out-runs/
+
+# Local development plans and research material
+docs/Dashboard-readiness-plan.md
+docs/Orchestration-Research-Plan.md
+docs/2512.04388v5.pdf
+docs/2512.04695v3.pdf
+docs/2606.21228v2.pdf
+papers/institutions-as-code/

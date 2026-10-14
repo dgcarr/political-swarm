@@ -435,19 +435,25 @@ npm run example
 npm run smoke:dashboard-live
 ```
 
-The `PR CI` workflow (`.github/workflows/pr.yml`) runs only on `pull_request`, on Node 20, and covers `npm run build`, `npm test`, the engine and live-dashboard smoke tests (`smoke:engine`, `smoke:dashboard-live`) and the governance tour (`npm run example`). All three run a real engine with the no-op strategy, so they need no API key and no recorded runs. `smoke:dashboard` replays recorded runs from the gitignored `runs/` and `benchmark/results/`, so it fails on a fresh clone and stays a local tool.
+The `CI` workflow (`.github/workflows/pr.yml`) runs on pull requests, pushes to `main`, and manual dispatch, on Node 20. It covers `npm run build`, `npm test`, the engine and live-dashboard smoke tests (`smoke:engine`, `smoke:dashboard-live`) and the governance tour (`npm run example`). All three run a real engine with the no-op strategy, so they need no API key and no recorded runs. `smoke:dashboard` replays recorded runs from the gitignored `runs/` and `benchmark/results/`, so it fails on a fresh clone and stays a local tool.
+
+The repository's Claude hooks use Graphify only when it is installed. It is not needed to build,
+test, or use Political Swarm.
 
 `smoke:engine`, `example` and `smoke:dashboard-live` make no OpenRouter calls and incur no model cost. `smoke:mcp`, `smoke:capitalist`, `smoke:democratic`, `smoke:socialist`, `smoke:delivery`, and `smoke:budget` make real OpenRouter calls, and `smoke:models` needs catalog network access and an API key for small paid decision-model probes; `npm run smoke:all` includes the paid ones and should only be run intentionally with a configured key and budget.
 
 ## Limitations
 
 - AI output is nondeterministic and can be incorrect or unsafe; human review remains mandatory.
+- Evidence descriptions are model-written and can claim tests that do not exist. A passing test
+  command does not prove every claimed check ran. Review the actual tests and output against each
+  requirement before accepting a delivery; record manual inspection as manual evidence.
 - Worktrees isolate Git changes but do not sandbox filesystem, network, or process access.
 - MCP's human-versus-model request limitation is described in the safety model above.
 - OpenRouter model availability, behavior, and pricing are external dependencies.
 - Verification categories are repository-configured. Task checks are regression-relative except for tasks that own or modify test files, which must also pass the strict required-check suite. Final required checks are strict.
 - Benchmark results are recorded (see above) but come from one sweep of three trials, run on an engine since superseded; conclusions require repeated controlled runs and independent scoring.
-- The dashboard propaganda library can contain historically offensive material. The repository ships 35 poster images under `assets/propaganda/` (with `credits.json` records); `npm run propaganda:fetch` and `mcp-server/scripts/fetch-from-links.mjs` (which downloads the URLs listed in each tradition's `links.txt`) add more, so curate the library locally.
+- The optional dashboard poster library can contain historically offensive material. The repository includes empty strategy directories under `assets/propaganda/`; use `npm run propaganda:fetch` or add images with source credits yourself. Review downloaded material before displaying or redistributing it.
 
 ## Documentation
 

@@ -8,7 +8,8 @@ before reading or grepping raw files. That is wrong during an extraction pass: t
 extraction subagents *build* the graph, so querying it would return the stale nodes
 they are replacing and bias the extraction toward what is already there.
 
-Both hooks are therefore skipped while `graphify-out/.graphify_extracting` exists.
+Graphify is optional. Both hooks are skipped if `graphify` is not installed, or while
+`graphify-out/.graphify_extracting` exists.
 Create that marker before dispatching extraction subagents and delete it in the
 cleanup step:
 
