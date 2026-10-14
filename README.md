@@ -104,14 +104,20 @@ branch (`/swarm-start ... --base-branch=master`, the `baseBranch` argument of `s
 category runs `npm test`; for a Python or other non-npm repository, edit it first — see
 [`docs/Configuration.md`](docs/Configuration.md).
 
-Everyday prompts do not need a formal specification. `/swarm-start` inspects relevant context,
-preserves explicit criteria, and adds a small checkable checklist labeled `Inferred:`. Consequential
-defaults are recorded as `Assumption:` constraints and briefly disclosed before starting. Claude asks
-only about important unresolved choices, not routine implementation details or checklist approval.
-The current repository and established strategy are reused; without a strategy preference it uses
-socialist and says so. Inferred criteria become top-level requirements with the same evidence checks.
-This preparation is Claude's workflow (also described by the MCP tool); the server does not itself
-generate criteria for API clients that pass an empty list. Applying changes still requires confirmation.
+You can use a plain request like "fix the search". Claude reads the relevant code, keeps your stated
+requirements, and adds a short testable checklist labeled `Inferred:`. Important guesses are saved
+as `Assumption:` notes and explained briefly. Claude asks only when a missing answer matters;
+otherwise it starts. It reuses your repository and strategy, or tells you it is using socialist.
+Applying the result still needs your confirmation.
+
+Simple tasks usually need 3–5 added requirements. Each should say something different; all your
+explicit requirements are kept. Inferred requirements need the same proof as yours. Claude prepares
+these before calling the server; API callers that send an empty list do not get them automatically.
+
+For CLI trials, use only `Read,Glob,Grep,Bash,Monitor,ToolSearch` and the permissions needed.
+Use Monitor to wait for progress. If waiting fails, stop instead of repeatedly asking for status.
+Fewer tools and shorter briefs reduce input, but each Claude call still includes system instructions
+and conversation history.
 
 ### Try it without a key
 

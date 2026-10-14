@@ -1,84 +1,44 @@
 ---
-description: Start a governance-driven code swarm on a task
+description: Start a coding swarm
 argument-hint: [task description] [--strategy=democratic|socialist|capitalist] [--budget=usd] [--repo=path] [--base-branch=name]
 allowed-tools: mcp__plugin_political-swarm_swarm__swarm_start, AskUserQuestion, Read, Glob, Grep, Bash(git status:*), Bash(git symbolic-ref:*), Bash(git branch:*)
 ---
 
-<!--
-Section 5 of every doctrine in docs/philosophy/ defines Claude's role here, in identical words
-across all three: Claude is the external, politically neutral orchestrator. It instantiates exactly
-one doctrine per run — philosophies do not communicate with one another and do not run concurrently.
-Claude may sequence phases, spin up model instances, pass artefacts between them, enforce resource
-limits and resolve runtime failures. It must not replace, shortcut or overrule the doctrine's
-internal decision procedure.
--->
+Claude prepares the request and checks the result. The chosen strategy controls how the swarm
+plans, assigns and reviews its work. Do not replace its decisions with your own.
 
 Parse `$ARGUMENTS` for the task description and any `--strategy=`, `--budget=`, `--repo=`, or `--base-branch=` flags (`--base-branch` becomes `baseBranch`).
 
 Use the strategy selected in this conversation or `--strategy`. If neither exists, use `socialist`
 and disclose that default briefly; do not require an everyday user to choose a governance model.
-If the user asks about alternatives, describe them:
-- **democratic** — Westminster-style: committees + an adversarial opposition review every change, votes decide merges with thresholds scaled to risk (simple majority for routine work, supermajority + Security Committee for security-boundary changes).
-- **socialist** — a federated council swarm: worker councils inspect the repository before the plan is written, a rotating coordinating council holds a bounded, recallable mandate, specialist guilds advise across councils, no agent reviews its own work, and overruled objections survive as minority reports.
-- **capitalist** — an internal task-exchange: worker personas bid on subtasks, work is awarded by expected value (not just lowest price), and capital/reputation accounts gate who can take on risky work.
+Explain alternatives only if asked: democratic uses votes and opposition review; socialist uses
+worker councils and peer review; capitalist uses bids and contracts.
 
 Determine `repoPath`: use `--repo=` if given, otherwise the current project's working directory.
 Use an already-established target without asking again. Ask only when multiple plausible targets
 remain or no Git repository can be identified. The swarm creates an isolated worktree; applying
 changes still requires the separate `/swarm-apply` confirmation.
 
-### Turn an everyday prompt into a checkable brief
+### Prepare the request
 
-Expect short, blunt, misspelled or detail-light requests such as "fix the search" or "add CSV export".
-Do this preparation yourself; do not ask the user to write a specification or acceptance criteria.
+Short or vague prompts are normal. Read the relevant code and tests; reuse what you already know.
+Do not ask the user to write a specification.
 
-1. Read the relevant repository instructions, entry points, existing behavior, tests and check
-   commands. Use focused inspection, not a repository-wide audit. Reuse context already established
-   in the conversation. Never claim to have inspected something you could not access.
-2. Preserve every explicit user criterion **verbatim** in `acceptanceCriteria`. User instructions
-   override inferred requirements. When criteria are absent or incomplete, derive a small checklist
-   of observable behavior from the request and inspected context. Include the main success case,
-   relevant edge/failure behavior, compatibility that matters, and evidence that would demonstrate
-   success. Do not pad simple work into a large feature, invent performance targets, add dependencies,
-   or promise unrelated cleanup. A spelling error is not an ambiguity when intent is clear.
-3. Prefix each added criterion with `Inferred: `; keep that exact text throughout the evidence matrix.
-   Record consequential defaults separately in `constraints` as `Assumption: ... (basis: ...)`.
-   Cite a concrete file, established convention or conservative default as the basis; distinguish
-   inspected facts from guesses. Also carry scope boundaries and known validation commands in
-   `constraints`. Do not invent command names or treat file existence as proof of correct behavior.
-   Criteria and assumptions must travel in the actual tool arguments, not only in chat.
-4. Ask a focused question only if an unresolved choice materially changes user-visible behavior,
-   scope, data handling, security, compatibility, cost or an irreversible action, and the repository
-   and conversation do not settle it. Explain the practical choice in plain language. Batch related
-   blocking choices into one short question with a recommended option. Wait for the answer before
-   starting dependent work. Do not invent essential domain rules, missing secrets, or authorization.
-   Routine implementation details and reversible defaults do not require approval.
-5. Otherwise show a short statement of what you will do and the important assumption(s), then start
-   immediately. This is disclosure, not a request to approve a checklist. Keep the full brief in the
-   tool call; do not overwhelm the user with internal process. If the user explicitly asks for no
-   inference, honor that and retain their scope; disclose any verification gap instead of fabricating
-   criteria.
+- Keep the user's stated requirements word for word. For simple tasks, add about 3–5 testable
+  requirements labeled `Inferred: ` in `acceptanceCriteria`. Avoid overlap, but never drop a needed
+  requirement to meet that target. Respect a request not to infer anything.
+- Keep `task` short and clear on its own. Put limits and known test commands in `constraints`.
+  Record important guesses there as `Assumption: ... (basis: ...)`, with the code or convention
+  behind each one. Do not repeat requirements across fields. Tests must check behavior, not just
+  whether a file exists. Do not invent features, evidence, business rules or permission.
+- Ask only if a missing answer changes what gets built, which data is used, safety, compatibility,
+  cost, or an action that cannot be undone. Check the code and conversation first. Group related
+  questions and wait for answers before starting. Do not ask about routine coding choices or typos.
+- Otherwise say briefly what you will build and any important assumptions, then start. Do not ask
+  for checklist approval. The user's instructions take priority. Keep requirements unchanged during
+  review; never weaken them just to pass a test. Let the swarm plan and divide the work.
 
-Keep `task` self-contained: preserve the user's request, add only the relevant inspected context,
-and identify the intended output and boundaries. Never send only a pointer to another instruction
-file. Leave task decomposition, worker ownership and internal decisions to the selected doctrine.
-Use the prepared checklist as the top-level `acceptanceCriteria`, so inferred requirements receive
-the same evidence checks as explicit ones. Do not silently relax it after a failed check.
-
-Examples:
-- "fix the search" with a reproduced regression and existing tests: describe the observed failure,
-  infer restoration of that behavior plus a regression test, preserve existing search conventions,
-  and proceed. If neither context nor inspection identifies what is broken, ask what the user sees
-  and what they expected instead of inventing a bug.
-- "add CSV export" on an existing table: infer export of its displayed columns using the current
-  export conventions, escaping commas/quotes/newlines and a content-level test. If filtered versus
-  all-record export has no established convention and changes the intended scope, ask that one
-  question; do not ask the user to choose a parser library or write test cases.
-- "delete old customer records": ask about the retention cutoff and deletion semantics if not
-  established; never guess a destructive policy.
-
-Exactly one doctrine runs per task. Do not offer to run two for comparison within a single run, and
-do not mix mechanisms between them.
+Use one strategy per run. If the user requests a comparison, use separate runs.
 
 The swarm uses whatever OpenRouter models `/swarm-setup` last configured (or `config/models.yaml`'s built-in default if it's never been run). Mention `/swarm-setup` is available to change this, but don't block on it.
 

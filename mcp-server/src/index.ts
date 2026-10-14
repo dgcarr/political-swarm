@@ -106,16 +106,14 @@ function registerTools(server: McpServer, dependencies: Dependencies, dashboard:
     'swarm_start',
     {
       description:
-        'Start a governance-driven code swarm on a task. Before calling, turn everyday, detail-light ' +
-        'requests into a self-contained brief using focused repository inspection and conversation context. ' +
-        'Preserve explicit acceptance criteria verbatim; add observable, testable criteria prefixed ' +
-        '"Inferred: " when needed and pass them in acceptanceCriteria. Record consequential defaults as ' +
-        '"Assumption: ... (basis: ...)" in constraints, alongside scope and known validation commands. ' +
-        'Briefly disclose important assumptions and proceed without routine confirmation. Ask only when ' +
-        'an unresolved choice materially affects behavior, scope, data, security, compatibility, cost or ' +
-        'irreversible actions; wait for that answer. Do not invent essential domain rules or authorization. ' +
-        'Use the established repository and strategy; absent a strategy preference, disclose and use socialist. ' +
-        'Honor an explicit request not to infer criteria. Never silently weaken criteria to pass checks.',
+        'Start a coding swarm. Read relevant code. Keep user requirements word for word; add about 3–5 ' +
+        'testable "Inferred: " criteria for simple tasks, without overlap or dropping needed requirements. ' +
+        'Respect requests not to infer. Keep task short. Put limits, known tests and important guesses ' +
+        'in constraints; label guesses "Assumption: ... (basis: ...)". Do not repeat criteria there. ' +
+        'Briefly explain assumptions, then start. Ask and wait only when a missing answer matters to ' +
+        'behavior, scope, data, security, compatibility, cost or actions that cannot be undone. Never ' +
+        'invent business rules or permission, or weaken requirements to pass. Reuse the chosen repo ' +
+        'and strategy; if no strategy was chosen, say you are using socialist.',
       inputSchema: swarmStartInputShape,
     },
     adaptToolHandler((input) => swarmStart(engine, defaultRepoPath, input)),
