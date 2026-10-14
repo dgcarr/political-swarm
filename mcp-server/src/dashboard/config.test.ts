@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import path from 'node:path';
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { DEFAULT_BANNER_MS, DEFAULT_DASHBOARD_PORT, dashboardUrl, loadDashboardConfig } from './config.js';
 import { assetPath, assetsPresent, defaultPropagandaDir, publicDir } from './paths.js';
 
@@ -97,10 +97,5 @@ describe('asset paths', () => {
     expect(defaultPropagandaDir.endsWith(path.join('assets', 'propaganda'))).toBe(true);
     // Inside public/ it would be wiped and re-copied by the build; it must not be.
     expect(defaultPropagandaDir.startsWith(publicDir)).toBe(false);
-    // Each tradition gets a directory even before any posters are fetched or added by hand.
-    for (const strategy of ['socialist', 'democratic', 'capitalist']) {
-      const dir = path.join(defaultPropagandaDir, strategy);
-      expect(existsSync(dir), dir).toBe(true);
-    }
   });
 });

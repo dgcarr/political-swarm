@@ -81,13 +81,13 @@ Prerequisites are Git, Claude Code, Node.js 20 or later (`engines` in `mcp-serve
 ```bash
 git clone https://github.com/dgcarr/political-swarm.git
 cd political-swarm
-cp .env.example .env                 # then add OPENROUTER_API_KEY locally
 cd mcp-server && npm install && npm run build && cd ..
 claude plugin marketplace add "$PWD" --scope local
 claude plugin install political-swarm@political-swarm-marketplace
 ```
 
-Restart Claude Code, run `/mcp`, and confirm the `swarm` server exposes **15 tools**. Then:
+Set up your key using [Your OpenRouter key](#your-openrouter-key) below, then launch Claude Code
+from that terminal. Run `/mcp` and confirm the `swarm` server exposes **15 tools**. Then:
 
 ```text
 /swarm-setup
@@ -147,7 +147,58 @@ under `runs/smoke-<doctrine>/`, so add `--runs-dir ../runs/smoke-democratic`).
 
 Clone and build as above. Register the repository directory as a local marketplace with `claude plugin marketplace add "/path/to/political-swarm" --scope local`, then install `political-swarm@political-swarm-marketplace`. Restart Claude Code after installation. Use `--scope project` only when you intentionally want to share marketplace registration with a project.
 
-Installing **copies** the repository into `~/.claude/plugins/cache/political-swarm-marketplace/political-swarm/<version>/`, and `${CLAUDE_PLUGIN_ROOT}` points at that copy. The server loads the `.env` in the plugin root (`mcp-server/src/index.ts`: `<plugin root>/.env`, with `SWARM_PLUGIN_ROOT` overriding the root), so the key, `runs/`, `config/` edits and `config/models.local.json` all live in the cache copy, not your clone. After pulling or rebuilding the clone, run `claude plugin update political-swarm` (or reinstall) to pick up the changes. Session-only loading with `--plugin-dir` (below) uses the clone in place and avoids the copy.
+Installing copies the plugin into `~/.claude/plugins/cache/political-swarm-marketplace/political-swarm/<version>/`.
+Its `.env`, `runs/` and local configuration are read from that copy. A `.env` in your original clone
+is not the installed plugin's key file. The environment-variable method below avoids that confusion.
+After pulling or rebuilding the clone, run `claude plugin update political-swarm` (or reinstall).
+Check local configuration after an update: the active cache directory can change.
+
+### Your OpenRouter key
+
+Use your own key from your OpenRouter account. Enter it locally; never paste it into a chat, issue,
+README, screenshot or command containing the key itself. Never put it in `.mcp.json` or commit it.
+
+**Recommended: enter it privately when starting Claude.** In a Bash terminal on Linux or macOS:
+
+```bash
+read -r -s -p 'OpenRouter API key: ' OPENROUTER_API_KEY
+printf '\n'
+export OPENROUTER_API_KEY
+claude
+unset OPENROUTER_API_KEY
+```
+
+Paste the key at the hidden prompt and press Enter. The key is not shown or entered as a shell
+command, so it stays out of shell history. Claude and the MCP server inherit it from this terminal.
+When Claude exits, the last line removes it from the shell. Start Claude this way whenever you need
+the key; an app opened from a desktop icon may not inherit this environment.
+
+**Optional: save it in a local `.env`.** Use this if you prefer a file that the server loads at
+startup. Choose the correct plugin root first:
+
+- Marketplace installation: the active version directory under
+  `~/.claude/plugins/cache/political-swarm-marketplace/political-swarm/`.
+- `--plugin-dir`: the repository directory you pass to that option.
+
+From that directory, create a private file without overwriting an existing one:
+
+```bash
+(umask 077; touch .env)
+chmod 600 .env
+```
+
+Open `.env` in a local text editor and set `OPENROUTER_API_KEY=` to your key. Save it and restart
+Claude. Do not print the file to the terminal. The server loads `<plugin root>/.env`; a key already
+set in the environment takes priority. `SWARM_PLUGIN_ROOT` changes which root is used.
+
+`.env` is ignored by Git, but it is plain text. File permissions limit access by other users;
+programs running as you can still read it. Swarm check commands receive a scrubbed environment,
+but that does not prevent code from reading files on disk. Use a trusted repository and review
+model-written code. See the [security policy](.github/SECURITY.md) for isolation options.
+
+Before paid runs, review `config/budget.yaml`. Run budgets are admission limits, not a guaranteed
+maximum bill: calls already in progress can exceed them. If a key is exposed, revoke it in
+OpenRouter and replace it. Removing it from a file or Git commit does not make it safe again.
 
 ### Session-only development
 
@@ -453,7 +504,7 @@ test, or use Political Swarm.
 - OpenRouter model availability, behavior, and pricing are external dependencies.
 - Verification categories are repository-configured. Task checks are regression-relative except for tasks that own or modify test files, which must also pass the strict required-check suite. Final required checks are strict.
 - Benchmark results are recorded (see above) but come from one sweep of three trials, run on an engine since superseded; conclusions require repeated controlled runs and independent scoring.
-- The optional dashboard poster library can contain historically offensive material. The repository includes empty strategy directories under `assets/propaganda/`; use `npm run propaganda:fetch` or add images with source credits yourself. Review downloaded material before displaying or redistributing it.
+- The optional dashboard poster library can contain historically offensive material. No poster directory is bundled. `npm run propaganda:fetch` creates `assets/propaganda/` locally; you can also use `SWARM_DASHBOARD_BANNER_DIR` for your own library. Review downloaded material before displaying or redistributing it.
 
 ## Documentation
 
