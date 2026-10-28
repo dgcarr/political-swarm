@@ -358,7 +358,7 @@ Read with `process.env` in `mcp-server/src` (tests excluded). Never commit or pr
 | `SWARM_FULL_TRANSCRIPTS` | off | `engine/Ledger.ts` | `1` records full call transcripts (can include repository file contents). The benchmark's `--full-transcripts` sets it. |
 | `SWARM_DASHBOARD` | on | `dashboard/config.ts` | `0`/`false`/`no`/`off` disables the dashboard. |
 | `SWARM_DASHBOARD_PORT` | `8731` | `dashboard/config.ts` | Preferred port; always bound to 127.0.0.1. If taken, the dashboard stands down. |
-| `SWARM_DASHBOARD_OPEN` | on | `dashboard/config.ts` | Open the default browser when the MCP dashboard starts. Set `0` to opt out. |
+| `SWARM_DASHBOARD_OPEN` | on | `dashboard/config.ts` | Open the default browser when `/swarm-dashboard` (the `swarm_dashboard` tool) is used. It never opens at MCP server startup. Set `0` to opt out. |
 | `SWARM_DASHBOARD_RHETORIC` | `template` | `dashboard/config.ts` | `llm` re-voices the closing statement with the `rhetorician` role (paid call). |
 | `SWARM_DASHBOARD_WATCH` | on | `dashboard/config.ts` | Tail `runs/` for writes by other processes. |
 | `SWARM_DASHBOARD_BANNER` | on | `dashboard/config.ts` | Rotating poster banner. |

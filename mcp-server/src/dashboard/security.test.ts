@@ -69,7 +69,7 @@ describe('the dashboard is read-only', () => {
 
   it('never shells out, except from the one audited place that must', () => {
     // openBrowser.ts is the sole exemption: opening the page in the user's browser requires
-    // handing a URL to the platform's opener. It is opt-in (SWARM_DASHBOARD_OPEN), it never
+    // handing a URL to the platform's opener. It is on request (the swarm_dashboard tool, gated by SWARM_DASHBOARD_OPEN), it never
     // takes a URL from a request, and it validates against a loopback pattern before spawning.
     // The exemption is by exact filename so a second shell-out cannot appear unnoticed.
     const EXEMPT = 'openBrowser.ts';
@@ -86,7 +86,8 @@ describe('the dashboard is read-only', () => {
   it('never spawns anything from a request handler', () => {
     const server = SOURCES.find((s) => path.basename(s.file) === 'DashboardServer.ts');
     expect(server).toBeDefined();
-    // openInBrowser is called once at startup, not from handle(); the request path must stay clear.
+    // The server never opens a browser itself — only the swarm_dashboard tool does.
+    expect(server!.src).not.toMatch(/openInBrowser/);
     const afterHandle = server!.src.slice(server!.src.indexOf('private handle('));
     expect(afterHandle).not.toMatch(/openInBrowser/);
   });

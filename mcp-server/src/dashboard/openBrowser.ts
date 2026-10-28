@@ -7,6 +7,9 @@ const SAFE_URL = /^http:\/\/127\.0\.0\.1:\d{1,5}\/$/;
 /**
  * Opens the dashboard in the user's default browser, best-effort.
  *
+ * Called when the swarm_dashboard tool is used, never at MCP server startup: the server starts
+ * with every Claude Code session, and a tab opening on each launch is unwanted.
+ *
  * Disabled with SWARM_DASHBOARD_OPEN=0 for headless or browser-free use.
  * The URL is checked against a loopback pattern rather than trusted: this is the one
  * place the dashboard hands a string to the shell, and it must not become a way to launch

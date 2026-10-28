@@ -16,6 +16,7 @@ import { Ledger, type LedgerEntry } from '../engine/Ledger.js';
 import { RunStore, type RunState } from '../engine/RunStore.js';
 import { DashboardServer, isTerminal } from '../dashboard/DashboardServer.js';
 import { loadDashboardConfig } from '../dashboard/config.js';
+import { openInBrowser } from '../dashboard/openBrowser.js';
 import { log as createLog, reportChecks } from './harness.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -233,13 +234,16 @@ async function main(): Promise<void> {
     runsRootDir,
     bus,
     // When holding for a browser, use the real configured port so the usual URL works.
-    config: { ...base, enabled: true, autoOpen: hold && base.autoOpen, port: hold ? base.port : 0 },
+    config: { ...base, enabled: true, port: hold ? base.port : 0 },
   });
 
   const url = await dashboard.start();
   if (!url) throw new Error('dashboard failed to start');
   log(`Dashboard at ${url}`);
-  if (hold) log('Holding open — open that URL in a browser. Ctrl-C to stop.');
+  if (hold) {
+    if (base.autoOpen) openInBrowser(url);
+    log('Holding open — open that URL in a browser. Ctrl-C to stop.');
+  }
 
   const ledgerFrames: { type: string; hasLine: boolean; text: string }[] = [];
   const statements: string[] = [];

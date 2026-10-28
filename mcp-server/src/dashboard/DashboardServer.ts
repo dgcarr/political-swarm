@@ -12,7 +12,6 @@ import { narrate, titleResolverFor, type TickerLine } from './DoctrineNarrator.j
 import { aggregate, buildStatement, type DoctrinalStatement } from './DoctrinalStatement.js';
 import type { LlmRhetorician } from './LlmRhetorician.js';
 import { RunWatcher } from './RunWatcher.js';
-import { openInBrowser } from './openBrowser.js';
 // Run ids outside this charset are not run ids, and in particular cannot climb out of runsRootDir.
 import { RUN_ID_PATTERN } from '../util/ids.js';
 import { bannerRoot, buildManifest, contentTypeFor, isBannerStrategy, resolvePoster } from './banner.js';
@@ -347,6 +346,11 @@ export class DashboardServer {
     return this.boundPort === null ? null : dashboardUrl(this.config, this.boundPort);
   }
 
+  /** Whether swarm_dashboard should open the page in the user's browser (SWARM_DASHBOARD_OPEN). */
+  get autoOpen(): boolean {
+    return this.config.autoOpen;
+  }
+
   /** Diagnostic for the leak gate: open SSE connections right now. */
   get clientCount(): number {
     return this.clients.size;
@@ -408,7 +412,6 @@ export class DashboardServer {
         this.startHeartbeat();
         this.startWatcher();
         logger.info('Dashboard listening', { url: this.url });
-        if (this.config.autoOpen) openInBrowser(this.url as string);
         resolve(this.url);
       });
     });

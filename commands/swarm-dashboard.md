@@ -7,7 +7,7 @@ Call `swarm_dashboard`.
 
 If it reports `running: true`, give the user the URL as a clickable link. Explain that Political Swarm shows run progress and the next action, with Work plan, Workers and Event log tabs, expandable live doctrine narration, and Compare runs for a side-by-side view. Hidden runs can be restored without deleting their saved records.
 
-The dashboard opens in the default browser when its MCP server successfully starts. Set `SWARM_DASHBOARD_OPEN=0` in the plugin environment to disable automatic opening. This command returns the URL; it does not open another browser tab. The page updates automatically.
+Calling `swarm_dashboard` opens the page in the default browser (`opened: true`); it is not opened when Claude Code starts. Set `SWARM_DASHBOARD_OPEN=0` in the plugin environment to disable this, in which case `opened` is false and the user should click the link. The page updates automatically.
 
 If a run id was given in `$ARGUMENTS`, note that the page auto-selects a live run if there is one,
 and that they can pick any past run from the list on the left.

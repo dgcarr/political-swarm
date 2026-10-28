@@ -1,10 +1,12 @@
 import type { DashboardServer } from '../dashboard/DashboardServer.js';
+import { openInBrowser } from '../dashboard/openBrowser.js';
 
 export const swarmDashboardInputShape = {};
 
 export interface SwarmDashboardResult {
   running: boolean;
   url: string | null;
+  opened?: boolean;
   openClients?: number;
   note: string;
 }
@@ -14,12 +16,21 @@ export interface SwarmDashboardResult {
  *
  * The dashboard is deliberately allowed to fail without taking the MCP server down, so "not
  * running" is a normal answer that needs an actionable explanation rather than an error.
+ *
+ * This is the only place the browser is opened, so it happens when the user asks for the
+ * dashboard rather than every time Claude Code starts the MCP server.
  */
-export async function swarmDashboard(dashboard: DashboardServer | null): Promise<SwarmDashboardResult> {
+export async function swarmDashboard(
+  dashboard: DashboardServer | null,
+  open: (url: string) => void = openInBrowser,
+): Promise<SwarmDashboardResult> {
   if (dashboard?.url) {
+    const opened = dashboard.autoOpen;
+    if (opened) open(dashboard.url);
     return {
       running: true,
       url: dashboard.url,
+      opened,
       openClients: dashboard.clientCount,
       note:
         'Open this in a browser to watch runs live. The page is read-only and bound to loopback; ' +
