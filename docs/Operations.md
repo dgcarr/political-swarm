@@ -2,6 +2,10 @@
 
 This document covers what a run leaves on disk, what survives a crash, how to resume a run, and how to check that a finished run's record is complete and unaltered. For configuration keys, see [Configuration.md](Configuration.md). For the acceptance protocol between the swarm and Claude, see [Orchestrator-Contract.md](Orchestrator-Contract.md). For the threat model, see [`.github/SECURITY.md`](../.github/SECURITY.md).
 
+## MCP tools
+
+The `swarm` MCP server exposes 15 MCP tools. Run `/mcp` in Claude Code to confirm they are all listed. The registered MCP tools are: `swarm_start`, `swarm_status`, `swarm_get_diff`, `swarm_decide`, `swarm_get_delivery`, `swarm_accept`, `swarm_remediate`, `swarm_apply`, `swarm_stop`, `swarm_resume`, `swarm_verify_run`, `swarm_list_runs`, `swarm_list_models`, `swarm_configure_models`, and `swarm_dashboard`.
+
 ## What a run leaves on disk
 
 Each run has a directory under the runs root: `<plugin root>/runs/` by default, or `SWARM_RUNS_DIR` if set. The benchmark writes under `runs/benchmark/` instead.
